@@ -213,10 +213,36 @@ export function MusicPlayer() {
               <button type="button" className="ctl" aria-label="Next track" onClick={() => engine.next()}>
                 <NextIcon />
               </button>
+              <button
+                type="button"
+                className="ctl"
+                aria-label="Open playlist"
+                aria-expanded={open}
+                onClick={() => setOpen(true)}
+              >
+                <ListIcon />
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {open && (
+        <PlaylistPanel
+          tracks={bethakPlaylist}
+          currentIndex={state.index}
+          shuffle={state.shuffle}
+          repeat={state.repeat}
+          onSelect={(i) => {
+            engine.playAt(i);
+            setOpen(false);
+          }}
+          onToggleShuffle={() => engine.setShuffle(!state.shuffle)}
+          onToggleRepeat={() => engine.setRepeat(!state.repeat)}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   );
 }
+
