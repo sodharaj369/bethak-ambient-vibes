@@ -47,11 +47,18 @@ function NoteIcon() {
 
 const YT_HOST_ID = "bethak-yt-host";
 
-function Artwork({ candidates, title }: { candidates: string[]; title: string }) {
-  const [i, setI] = useState(0);
-  // Reset the fallback chain whenever the track changes.
-  useEffect(() => setI(0), [candidates]);
-  const src = candidates[i];
+function Artwork({
+  trackId,
+  candidates,
+  title,
+}: {
+  trackId: string;
+  candidates: string[];
+  title: string;
+}) {
+  const [fallback, setFallback] = useState({ trackId, index: 0 });
+  const index = fallback.trackId === trackId ? fallback.index : 0;
+  const src = candidates[index];
   if (!src) return <NoteIcon />;
   return (
     <img
@@ -60,7 +67,12 @@ function Artwork({ candidates, title }: { candidates: string[]; title: string })
       className="h-full w-full object-cover"
       width={512}
       height={512}
-      onError={() => setI((n) => n + 1)}
+      onError={() =>
+        setFallback((current) => ({
+          trackId,
+          index: current.trackId === trackId ? current.index + 1 : 1,
+        }))
+      }
     />
   );
 }
@@ -117,9 +129,9 @@ export function MusicPlayer() {
         <div id={YT_HOST_ID} />
       </div>
       <div className="player" role="group" aria-label="Bethak music player">
-        <div className="artwork" key={state.track.id}>
+        <div className="artwork">
           <Artwork
-            key={state.track.id}
+            trackId={state.track.id}
             candidates={state.track.artworkCandidates}
             title={state.track.title}
           />
