@@ -133,7 +133,7 @@
 }
 
 @theme {
-  --font-devanagari: "Yatra One", "Tiro Devanagari Hindi", serif;
+  --font-devanagari: "Tiro Devanagari Hindi", serif;
   --font-ui: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 

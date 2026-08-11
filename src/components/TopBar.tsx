@@ -42,7 +42,7 @@ export function TopBar({
         {time}
       </span>
 
-      <span className="text-ui text-glow absolute left-1/2 top-4 -translate-x-1/2 md:top-6 inline-flex items-center gap-1.5 whitespace-nowrap">
+      <span className="text-ui text-glow absolute left-1/2 top-10 -translate-x-1/2 md:top-6 inline-flex items-center gap-1.5 whitespace-nowrap">
         <span className="online-dot" aria-hidden="true" />
         {online} online
       </span>
