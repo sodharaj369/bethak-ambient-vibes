@@ -312,12 +312,12 @@
 }
 
 @utility text-subtitle {
-  color: oklch(0.95 0.02 80 / 0.72);
+  color: oklch(0.95 0.02 80 / 0.78);
   font-size: clamp(0.875rem, 1.8vw, 0.95rem);
   line-height: 1.45;
   font-weight: 400;
   letter-spacing: 0.09em;
-  text-shadow: 0 1px 10px oklch(0.2 0.03 60 / 0.5);
+  text-shadow: 0 1px 10px oklch(0.2 0.03 60 / 0.35);
 }
 
 @utility yt-host {
