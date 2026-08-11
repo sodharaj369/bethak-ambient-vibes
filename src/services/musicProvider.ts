@@ -35,8 +35,8 @@ export class MockMusicProvider implements MusicProvider {
     this.tracks = tracks;
   }
 
-  getCurrentTrack() {
-    return this.tracks[this.index];
+  getCurrentTrack(): Track {
+    return this.tracks[this.index] as Track;
   }
 
   getState(): PlayerState {
