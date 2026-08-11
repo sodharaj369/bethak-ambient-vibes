@@ -27,7 +27,10 @@ export type PlayerState = {
   duration: number;
   /** False until the YouTube player is ready. */
   canPlay: boolean;
+  shuffle: boolean;
+  repeat: boolean;
 };
+
 
 type YTPlayer = {
   playVideo(): void;
