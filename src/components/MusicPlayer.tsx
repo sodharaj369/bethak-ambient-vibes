@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getYouTubeEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist } from "@/data/playlist";
+import { PlaylistPanel } from "@/components/PlaylistPanel";
 
 function fmt(s: number) {
   if (!Number.isFinite(s) || s < 0) s = 0;
@@ -109,6 +110,7 @@ function Artwork({
 export function MusicPlayer() {
   const engine = useMemo(() => getYouTubeEngine(YT_HOST_ID, bethakPlaylist), []);
   const [state, setState] = useState<PlayerState>(() => engine.getState());
+  const [open, setOpen] = useState(false);
   const barRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
 
