@@ -394,8 +394,8 @@
 @utility ctl {
   display: grid;
   place-items: center;
-  height: 34px;
-  width: 34px;
+  height: 30px;
+  width: 30px;
   border-radius: 9999px;
   color: oklch(0.97 0.01 85 / 0.8);
   transition:
@@ -412,10 +412,11 @@
 }
 
 @utility ctl-main {
-  height: 44px;
-  width: 44px;
+  height: 38px;
+  width: 38px;
   background: oklch(0.98 0.01 85 / 0.12);
 }
+
 
 @media (prefers-reduced-motion: reduce) {
   *,
