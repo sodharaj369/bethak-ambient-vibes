@@ -16,23 +16,11 @@ export function TopBar({
   youtubeUrl: string;
 }) {
   const [time, setTime] = useState<string>("");
-  const [online, setOnline] = useState(27);
 
   useEffect(() => {
     const tick = () => setTime(format(new Date()));
     tick();
     const id = setInterval(tick, 15000);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    setOnline(15 + Math.floor(Math.random() * 46));
-    const id = setInterval(() => {
-      setOnline((n) => {
-        const next = n + (Math.random() < 0.5 ? -1 : 1) * (1 + Math.floor(Math.random() * 3));
-        return Math.min(60, Math.max(15, next));
-      });
-    }, 22000);
     return () => clearInterval(id);
   }, []);
 
@@ -44,8 +32,9 @@ export function TopBar({
 
       <span className="text-ui text-glow absolute left-1/2 top-10 -translate-x-1/2 md:top-6 inline-flex items-center gap-1.5 whitespace-nowrap">
         <span className="online-dot" aria-hidden="true" />
-        {online} online
+        listening
       </span>
+
 
       <span className="pointer-events-auto flex items-center gap-4">
         <a className="text-ui text-glow link-quiet" href={spotifyUrl} target="_blank" rel="noreferrer">
