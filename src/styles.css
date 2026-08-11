@@ -272,14 +272,14 @@
 
 @utility player-shell {
   position: fixed;
-  bottom: 16px;
+  bottom: 12px;
   left: 12px;
   right: 12px;
   z-index: 30;
   display: flex;
   justify-content: center;
   @media (min-width: 768px) {
-    bottom: 28px;
+    bottom: 22px;
   }
 }
 
@@ -288,35 +288,37 @@
   align-items: center;
   gap: 14px;
   width: 100%;
-  max-width: 660px;
-  min-height: 88px;
-  padding: 14px 18px;
-  border-radius: 26px;
-  background: oklch(0.24 0.035 55 / 0.8);
-  backdrop-filter: blur(18px) saturate(130%);
-  box-shadow: 0 18px 50px oklch(0.12 0.02 60 / 0.45);
+  max-width: 720px;
+  padding: 10px 14px;
+  border-radius: 22px;
+  background: oklch(0.32 0.055 55 / 0.42);
+  backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid oklch(0.95 0.03 80 / 0.1);
+  box-shadow: 0 14px 40px oklch(0.12 0.02 60 / 0.35);
   color: oklch(0.97 0.01 85);
   @media (min-width: 768px) {
-    gap: 18px;
-    padding: 16px 22px;
-    min-height: 96px;
-    border-radius: 30px;
+    gap: 16px;
+    padding: 12px 18px;
+    max-width: 780px;
+    border-radius: 26px;
   }
 }
 
 @utility artwork {
   display: grid;
   place-items: center;
-  height: 52px;
-  width: 52px;
+  height: 56px;
+  width: 56px;
   flex: none;
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
-  background: oklch(0.35 0.06 55 / 0.8);
+  background: oklch(0.35 0.06 55 / 0.6);
+  box-shadow: 0 6px 18px oklch(0.12 0.02 60 / 0.4);
   color: oklch(0.95 0.02 85);
   @media (min-width: 768px) {
     height: 64px;
     width: 64px;
+    border-radius: 16px;
   }
 }
 
@@ -346,13 +348,13 @@
 }
 
 @utility track-artist {
-  font-size: 0.72rem;
-  opacity: 0.62;
+  font-size: 0.7rem;
+  opacity: 0.6;
   margin-top: 1px;
 }
 
 @utility progress {
-  margin-top: 10px;
+  margin-top: 8px;
   height: 2px;
   width: 100%;
   border-radius: 9999px;
@@ -367,11 +369,16 @@
   }
 }
 
-@utility track-times {
-  margin-top: 5px;
+@utility player-row {
+  margin-top: 4px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  font-size: 0.6rem;
+  gap: 10px;
+}
+
+@utility track-times {
+  font-size: 0.62rem;
   opacity: 0.45;
   font-variant-numeric: tabular-nums;
 }
@@ -379,15 +386,16 @@
 @utility controls {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex: none;
 }
+
 
 @utility ctl {
   display: grid;
   place-items: center;
-  height: 34px;
-  width: 34px;
+  height: 30px;
+  width: 30px;
   border-radius: 9999px;
   color: oklch(0.97 0.01 85 / 0.8);
   transition:
@@ -404,10 +412,11 @@
 }
 
 @utility ctl-main {
-  height: 44px;
-  width: 44px;
+  height: 38px;
+  width: 38px;
   background: oklch(0.98 0.01 85 / 0.12);
 }
+
 
 @media (prefers-reduced-motion: reduce) {
   *,

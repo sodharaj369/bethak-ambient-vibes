@@ -54,43 +54,55 @@ export function MusicPlayer() {
   return (
     <div className="player-shell">
       <div className="player" role="group" aria-label="Bethak music player">
-        <div className="artwork" aria-hidden="true">
-          {state.track.artwork ? (
-            <img src={state.track.artwork} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <span className="font-devanagari text-lg opacity-70">स</span>
-          )}
+        <div className="artwork">
+          <img
+            src={state.track.artwork}
+            alt={`Artwork for ${state.track.title}`}
+            className="h-full w-full object-cover"
+            width={512}
+            height={512}
+            loading="lazy"
+          />
         </div>
 
         <div key={state.index} className="track-meta">
           <p className="track-title">{state.track.title}</p>
           <p className="track-artist">{state.track.artist}</p>
-          <div className="progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)} aria-label="Track progress">
+          <div
+            className="progress"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(pct)}
+            aria-label="Track progress"
+          >
             <span style={{ width: `${pct}%` }} />
           </div>
-          <div className="track-times">
-            <span>{fmt(state.position)}</span>
-            <span>{fmt(state.duration)}</span>
-          </div>
-        </div>
 
-        <div className="controls">
-          <button type="button" className="ctl" aria-label="Previous track" onClick={() => provider.previous()}>
-            <PrevIcon />
-          </button>
-          <button
-            type="button"
-            className="ctl ctl-main"
-            aria-label={state.isPlaying ? "Pause" : "Play"}
-            onClick={() => (state.isPlaying ? provider.pause() : provider.play())}
-          >
-            {state.isPlaying ? <PauseIcon /> : <PlayIcon />}
-          </button>
-          <button type="button" className="ctl" aria-label="Next track" onClick={() => provider.next()}>
-            <NextIcon />
-          </button>
+          <div className="player-row">
+            <span className="track-times">
+              {fmt(state.position)} / {fmt(state.duration)}
+            </span>
+            <div className="controls">
+              <button type="button" className="ctl" aria-label="Previous track" onClick={() => provider.previous()}>
+                <PrevIcon />
+              </button>
+              <button
+                type="button"
+                className="ctl ctl-main"
+                aria-label={state.isPlaying ? "Pause" : "Play"}
+                onClick={() => (state.isPlaying ? provider.pause() : provider.play())}
+              >
+                {state.isPlaying ? <PauseIcon /> : <PlayIcon />}
+              </button>
+              <button type="button" className="ctl" aria-label="Next track" onClick={() => provider.next()}>
+                <NextIcon />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
