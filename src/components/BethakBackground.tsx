@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import roomAsset from "@/assets/bethak-room.png.asset.json";
+import roomImage from "@/assets/bethak-room.webp";
 import { RoomAmbience } from "@/components/RoomAmbience";
 
 type Phase = "evening" | "night" | "late" | "deep";
@@ -29,7 +29,7 @@ export function BethakBackground() {
       <div className="room-frame">
         <div className="room-breathe">
         <img
-          src={roomAsset.url}
+          src={roomImage}
           alt="A quiet Indian sitting room at night: a wooden diwan with cushions, chai on a low table, a harmonium, a warm lamp and a moonlit window"
           className="h-full w-full object-cover"
         />
