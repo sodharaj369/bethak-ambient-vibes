@@ -3,7 +3,7 @@ export function BethakTitle() {
     <div className="title-stack select-none">
       <h1 className="font-devanagari text-title text-glow-title">
         <span className="block">बैठक</span>
-        <span className="text-h1-desc">BETHAK — Late-Night Ghazal Radio</span>
+        <span className="text-h1-desc"> BETHAK — Late-Night Ghazal Radio</span>
       </h1>
       <p className="font-devanagari text-subtitle">ग़ज़लें • चाय • थोड़ी देर बैठो</p>
       <section className="bethak-desc" aria-label="About Bethak">
