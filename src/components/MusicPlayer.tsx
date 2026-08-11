@@ -44,6 +44,35 @@ function NoteIcon() {
     </svg>
   );
 }
+function ListIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+      <path d="M3 6h12v2H3zM3 11h12v2H3zM3 16h8v2H3zM17 10v7.2a2.6 2.6 0 1 0 1.6 2.4V13h2.4v-3z" />
+    </svg>
+  );
+}
+function ShuffleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
+      <path d="M16 4l4 3-4 3V8h-1.8l-2.1 2.7-1.3-1.6L13.3 6H16zM4 6h3.4l6.8 8.6.0.0H16v-2l4 3-4 3v-2h-2.7L6.5 8H4zM4 16h3.2l1.9-2.4 1.3 1.6L8 18H4z" />
+    </svg>
+  );
+}
+function RepeatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
+      <path d="M7 6h9V3.5L20.5 7 16 10.5V8H8v3.5L4.5 8 7 6zM17 18H8v2.5L3.5 17 8 13.5V16h8v-3.5l3.5 3.5L17 18z" />
+    </svg>
+  );
+}
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+      <path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z" />
+    </svg>
+  );
+}
+
 
 const YT_HOST_ID = "bethak-yt-host";
 
