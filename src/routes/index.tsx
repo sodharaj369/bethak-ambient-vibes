@@ -39,7 +39,7 @@ export const Route = createFileRoute("/")({
           url: SITE_URL + "/",
           description: DESCRIPTION,
           inLanguage: ["hi", "en"],
-Ѝ        }),
+}),
       },
     ],
   }),
