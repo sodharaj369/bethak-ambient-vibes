@@ -1,9 +1,9 @@
 import { bethakPlaylist, type MusicTrack } from "@/data/playlist";
 
 /**
- * Playback abstraction. The only implementation today is HtmlAudioEngine,
- * which drives a real <audio> element. Playback is a no-op until a track
- * carries an authorized `audioUrl` — nothing is ever simulated.
+ * Playback abstraction. The only implementation is YouTubeEngine, which drives a
+ * real YouTube IFrame Player. Nothing about progress or state is simulated —
+ * every value comes from the live player.
  */
 export interface MusicEngine {
   play(): Promise<void>;
@@ -25,47 +25,95 @@ export type PlayerState = {
   isPlaying: boolean;
   position: number;
   duration: number;
-  /** False when the current track has no authorized audio source. */
+  /** False until the YouTube player is ready. */
   canPlay: boolean;
 };
 
-export class HtmlAudioEngine implements MusicEngine {
+type YTPlayer = {
+  playVideo(): void;
+  pauseVideo(): void;
+  seekTo(seconds: number, allowSeekAhead: boolean): void;
+  loadVideoById(id: string): void;
+  cueVideoById(id: string): void;
+  getCurrentTime(): number;
+  getDuration(): number;
+  getPlayerState(): number;
+  destroy(): void;
+};
+
+declare global {
+  interface Window {
+    YT?: any;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
+let apiPromise: Promise<any> | null = null;
+
+/** Loads the official YouTube IFrame Player API exactly once. */
+function loadYouTubeApi(): Promise<any> {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if (apiPromise) return apiPromise;
+  apiPromise = new Promise((resolve) => {
+    if (window.YT?.Player) return resolve(window.YT);
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      prev?.();
+      resolve(window.YT);
+    };
+    const script = document.createElement("script");
+    script.src = "https://www.youtube.com/iframe_api";
+    script.async = true;
+    document.head.appendChild(script);
+  });
+  return apiPromise;
+}
+
+export class YouTubeEngine implements MusicEngine {
   private tracks: MusicTrack[];
   private index = 0;
-  private audio: HTMLAudioElement | null = null;
+  private player: YTPlayer | null = null;
+  private ready = false;
+  private playing = false;
+  private wantPlay = false;
   private listeners = new Set<(s: PlayerState) => void>();
+  private ticker: ReturnType<typeof setInterval> | null = null;
+  private disposed = false;
 
-  constructor(tracks: MusicTrack[] = bethakPlaylist) {
+  constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
     this.tracks = tracks;
-    if (typeof window !== "undefined" && typeof Audio !== "undefined") {
-      this.audio = new Audio();
-      this.audio.preload = "metadata";
-      const emit = () => this.emit();
-      this.audio.addEventListener("timeupdate", emit);
-      this.audio.addEventListener("durationchange", emit);
-      this.audio.addEventListener("loadedmetadata", emit);
-      this.audio.addEventListener("play", emit);
-      this.audio.addEventListener("pause", emit);
-      this.audio.addEventListener("error", emit);
-      this.audio.addEventListener("ended", () => this.next());
-      this.load();
-    }
-  }
-
-  private load(autoplay = false) {
-    const audio = this.audio;
-    if (!audio) return;
-    const url = this.getCurrentTrack().audioUrl;
-    if (!url) {
-      audio.removeAttribute("src");
-      audio.load();
-      this.emit();
-      return;
-    }
-    audio.src = url;
-    audio.load();
-    if (autoplay) void audio.play().catch(() => this.emit());
-    this.emit();
+    if (typeof window === "undefined") return;
+    void loadYouTubeApi().then((YT) => {
+      if (this.disposed || !YT?.Player) return;
+      this.player = new YT.Player(hostId, {
+        videoId: this.getCurrentTrack().youtubeId,
+        playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
+        events: {
+          onReady: () => {
+            this.ready = true;
+            if (this.wantPlay) this.player?.playVideo();
+            this.emit();
+          },
+          onStateChange: (e: { data: number }) => {
+            // 1 = playing, 2 = paused, 0 = ended
+            if (e.data === 0) {
+              this.next();
+              return;
+            }
+            this.playing = e.data === 1;
+            this.emit();
+          },
+          onError: () => {
+            this.playing = false;
+            this.emit();
+          },
+        },
+      }) as YTPlayer;
+    });
+    // Reads live player time — no simulated progress.
+    this.ticker = setInterval(() => {
+      if (this.ready && this.playing) this.emit();
+    }, 500);
   }
 
   getCurrentTrack(): MusicTrack {
@@ -73,22 +121,25 @@ export class HtmlAudioEngine implements MusicEngine {
   }
 
   getCurrentTime(): number {
-    return this.audio?.currentTime ?? 0;
+    if (!this.ready || !this.player) return 0;
+    const t = this.player.getCurrentTime();
+    return Number.isFinite(t) ? t : 0;
   }
 
   getDuration(): number {
-    const d = this.audio?.duration;
-    return Number.isFinite(d) && d ? (d as number) : this.getCurrentTrack().duration;
+    if (!this.ready || !this.player) return 0;
+    const d = this.player.getDuration();
+    return Number.isFinite(d) ? d : 0;
   }
 
   getState(): PlayerState {
     return {
       index: this.index,
       track: this.getCurrentTrack(),
-      isPlaying: !!this.audio && !this.audio.paused && !!this.getCurrentTrack().audioUrl,
+      isPlaying: this.playing,
       position: this.getCurrentTime(),
       duration: this.getDuration(),
-      canPlay: !!this.getCurrentTrack().audioUrl,
+      canPlay: this.ready,
     };
   }
 
@@ -106,32 +157,34 @@ export class HtmlAudioEngine implements MusicEngine {
   }
 
   async play() {
-    if (!this.audio || !this.getCurrentTrack().audioUrl) {
-      // No authorized source: stay honestly paused.
-      this.emit();
-      return;
-    }
-    try {
-      await this.audio.play();
-    } catch {
-      /* autoplay blocked or source unavailable */
-    }
+    this.wantPlay = true;
+    if (this.ready) this.player?.playVideo();
     this.emit();
   }
 
   pause() {
-    this.audio?.pause();
+    this.wantPlay = false;
+    if (this.ready) this.player?.pauseVideo();
+    this.emit();
+  }
+
+  private load(autoplay: boolean) {
+    const id = this.getCurrentTrack().youtubeId;
+    this.wantPlay = autoplay;
+    if (!this.ready || !this.player) return this.emit();
+    if (autoplay) this.player.loadVideoById(id);
+    else this.player.cueVideoById(id);
     this.emit();
   }
 
   next() {
-    const wasPlaying = this.getState().isPlaying;
+    const wasPlaying = this.playing || this.wantPlay;
     this.index = (this.index + 1) % this.tracks.length;
     this.load(wasPlaying);
   }
 
   previous() {
-    const wasPlaying = this.getState().isPlaying;
+    const wasPlaying = this.playing || this.wantPlay;
     if (this.getCurrentTime() > 3) {
       this.seek(0);
       return;
@@ -141,17 +194,22 @@ export class HtmlAudioEngine implements MusicEngine {
   }
 
   seek(seconds: number) {
-    if (!this.audio || !this.getCurrentTrack().audioUrl) return;
-    this.audio.currentTime = Math.max(0, Math.min(seconds, this.getDuration()));
+    if (!this.ready || !this.player) return;
+    const d = this.getDuration();
+    this.player.seekTo(Math.max(0, d ? Math.min(seconds, d) : seconds), true);
     this.emit();
   }
 
   dispose() {
-    if (this.audio) {
-      this.audio.pause();
-      this.audio.removeAttribute("src");
-      this.audio = null;
+    this.disposed = true;
+    if (this.ticker) clearInterval(this.ticker);
+    this.ticker = null;
+    try {
+      this.player?.destroy();
+    } catch {
+      /* player already gone */
     }
+    this.player = null;
     this.listeners.clear();
   }
 }

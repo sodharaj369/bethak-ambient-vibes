@@ -270,6 +270,15 @@
   letter-spacing: 0.01em;
 }
 
+@utility yt-host {
+  position: fixed;
+  left: -9999px;
+  bottom: 0;
+  width: 200px;
+  height: 200px;
+  pointer-events: none;
+}
+
 @utility player-shell {
   position: fixed;
   bottom: 12px;
