@@ -28,12 +28,6 @@ export default defineConfig({
         }
       : {}),
   },
-  ...(isPages
-    ? {
-        nitro: {
-          preset: "static",
-          output: { dir: "dist", publicDir: "dist" },
-        } as const,
-      }
-    : {}),
+  // GitHub Pages is static hosting: skip the Nitro server build entirely.
+  ...(isPages ? { nitro: false as const } : {}),
 });
