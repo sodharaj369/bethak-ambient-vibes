@@ -2,14 +2,21 @@ import artHarmonium from "@/assets/art-harmonium.jpg";
 import artMoon from "@/assets/art-moon.jpg";
 import artChai from "@/assets/art-chai.jpg";
 
-export type Track = {
+export type MusicTrack = {
+  id: string;
   title: string;
   artist: string;
   artwork: string;
-  duration: number; // seconds
+  /** Nominal track length in seconds. Real duration comes from the audio element once loaded. */
+  duration: number;
+  /** Authorized, licensed audio source. Empty string = playback disabled for this track. */
+  audioUrl: string;
   spotifyUrl: string;
   youtubeUrl: string;
 };
+
+/** Backwards-compatible alias. */
+export type Track = MusicTrack;
 
 const art = [artHarmonium, artMoon, artChai];
 
@@ -47,9 +54,15 @@ const seeds: Seed[] = [
   { title: "Ab Ke Hum Bichhde", artist: "Mehdi Hassan", duration: 424 },
 ];
 
-export const bethakPlaylist: Track[] = seeds.map((s, i) => ({
+const slug = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+export const bethakPlaylist: MusicTrack[] = seeds.map((s, i) => ({
+  id: `${i + 1}-${slug(s.title)}`,
   ...s,
   artwork: art[i % art.length] as string,
+  // No authorized audio source configured yet — playback stays disabled.
+  audioUrl: "",
   spotifyUrl: "",
   youtubeUrl: "",
 }));
