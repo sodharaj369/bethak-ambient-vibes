@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { YouTubeEngine, type PlayerState } from "@/services/musicEngine";
+import { getYouTubeEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist } from "@/data/playlist";
 
 function fmt(s: number) {
@@ -66,7 +66,7 @@ function Artwork({ candidates, title }: { candidates: string[]; title: string })
 }
 
 export function MusicPlayer() {
-  const engine = useMemo(() => new YouTubeEngine(YT_HOST_ID, bethakPlaylist), []);
+  const engine = useMemo(() => getYouTubeEngine(YT_HOST_ID, bethakPlaylist), []);
   const [state, setState] = useState<PlayerState>(() => engine.getState());
   const barRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);

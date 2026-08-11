@@ -95,13 +95,11 @@ export class YouTubeEngine implements MusicEngine {
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
         events: {
           onReady: () => {
-            console.log('[bethak] onReady');
             this.ready = true;
             if (this.wantPlay) this.player?.playVideo();
             this.emit();
           },
           onStateChange: (e: { data: number }) => {
-            console.log('[bethak] state', e.data);
             // -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
             if (e.data === 0) {
               this.next();
@@ -124,7 +122,7 @@ export class YouTubeEngine implements MusicEngine {
     });
     // Reads live player time — no simulated progress.
     this.ticker = setInterval(() => {
-      if (this.ready) { console.log('[bethak] tick', this.player?.getCurrentTime(), this.settling, this.listeners.size); this.emit(); }
+      if (this.ready) this.emit();
     }, 250);
   }
 
@@ -179,7 +177,6 @@ export class YouTubeEngine implements MusicEngine {
   }
 
   async play() {
-    console.log('[bethak] play()', this.ready, !!this.player);
     this.wantPlay = true;
     if (this.ready) this.player?.playVideo();
     this.emit();
@@ -237,4 +234,15 @@ export class YouTubeEngine implements MusicEngine {
     this.player = null;
     this.listeners.clear();
   }
+}
+
+/**
+ * One engine per page. React can construct components twice in development;
+ * a second YouTube player on the same host element would leave the UI bound to
+ * a stale, non-playing player object.
+ */
+let singleton: YouTubeEngine | null = null;
+export function getYouTubeEngine(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
+  if (!singleton) singleton = new YouTubeEngine(hostId, tracks);
+  return singleton;
 }
