@@ -309,11 +309,11 @@
 }
 
 @utility text-subtitle {
-  color: oklch(0.95 0.02 80 / 0.78);
-  font-size: clamp(0.95rem, 2.7vw, 1.05rem);
-  line-height: 1.4;
+  color: oklch(0.95 0.02 80 / 0.72);
+  font-size: clamp(0.875rem, 2.6vw, 0.97rem);
+  line-height: 1.45;
   font-weight: 400;
-  letter-spacing: 0.085em;
+  letter-spacing: 0.09em;
   text-shadow: 0 1px 10px oklch(0.2 0.03 60 / 0.5);
 }
 
