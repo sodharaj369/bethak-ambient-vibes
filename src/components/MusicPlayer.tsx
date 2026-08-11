@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { MockMusicProvider, type PlayerState } from "@/services/musicProvider";
+import { HtmlAudioEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist } from "@/data/playlist";
+
 
 function fmt(s: number) {
   const m = Math.floor(s / 60);
