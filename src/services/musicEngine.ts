@@ -69,6 +69,15 @@ function loadYouTubeApi(): Promise<any> {
   return apiPromise;
 }
 
+const EMPTY_TRACK: MusicTrack = {
+  id: "empty",
+  title: "No tracks configured",
+  artist: "Add songs in src/data/bethakPlaylist.ts",
+  youtubeId: "",
+  youtubeUrl: "",
+  artworkCandidates: [],
+};
+
 export class YouTubeEngine implements MusicEngine {
   private tracks: MusicTrack[];
   private index = 0;
@@ -86,6 +95,8 @@ export class YouTubeEngine implements MusicEngine {
   constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
     this.tracks = tracks;
     if (typeof window === "undefined") return;
+    // No valid tracks configured: stay inert rather than crash.
+    if (this.tracks.length === 0) return;
     void loadYouTubeApi().then((YT) => {
       if (this.disposed || !YT?.Player) return;
       this.player = new YT.Player(hostId, {
@@ -127,7 +138,7 @@ export class YouTubeEngine implements MusicEngine {
   }
 
   getCurrentTrack(): MusicTrack {
-    return this.tracks[this.index] as MusicTrack;
+    return (this.tracks[this.index] ?? EMPTY_TRACK) as MusicTrack;
   }
 
   /** Clears the post-load guard as soon as the player reports the new video. */
