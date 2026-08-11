@@ -1,24 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { BethakBackground } from "@/components/BethakBackground";
+import { BethakTitle } from "@/components/BethakTitle";
+import { TopBar } from "@/components/TopBar";
+import { MusicPlayer } from "@/components/MusicPlayer";
+import { EXTERNAL_LINKS } from "@/data/playlist";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "बैठक — BETHAK · a late-night ghazal room" },
+      {
+        name: "description",
+        content:
+          "A quiet digital baithak. Chai, a harmonium and old Hindi ghazals in a warm, moonlit Indian sitting room.",
+      },
+      { property: "og:title", content: "बैठक — BETHAK" },
+      {
+        property: "og:description",
+        content: "Sit, sip chai and listen to ghazals in a quiet late-night Indian sitting room.",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="bethak-screen">
+      <BethakBackground />
+      <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
+
+      <div className="title-slot">
+        <BethakTitle />
+      </div>
+
+      <MusicPlayer />
+    </main>
   );
 }
