@@ -12,6 +12,9 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+// Deployment base ("/" normally, "/<repo>/" on GitHub Pages) so icon URLs stay valid.
+const BASE = import.meta.env.BASE_URL;
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -98,11 +101,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
-      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
-      { rel: "manifest", href: "/site.webmanifest" },
+      { rel: "icon", href: `${BASE}favicon.ico`, sizes: "any" },
+      { rel: "icon", type: "image/svg+xml", href: `${BASE}favicon.svg` },
+      { rel: "icon", type: "image/png", sizes: "32x32", href: `${BASE}favicon-32.png` },
+      { rel: "apple-touch-icon", sizes: "180x180", href: `${BASE}apple-touch-icon.png` },
+      { rel: "manifest", href: `${BASE}site.webmanifest` },
 
     ],
   }),
