@@ -145,6 +145,42 @@ const bethakPlaylist: PlaylistEntry[] = [
     artist: "Mehdi Hassan",
     youtubeId: "Ds8nabK0vE8",
   },
+  {
+    id: "song-21",
+    title: "Apni Dhun Mein Rehta Hoon",
+    artist: "Ghulam Ali",
+    youtubeId: "YLMo9XwY5RM",
+  },
+  {
+    id: "song-22",
+    title: "Nayan Ne Bandh Rakhi Ne",
+    artist: "Manhar Udhas",
+    youtubeId: "g6UiqaJO7a0",
+  },
+  {
+    id: "song-23",
+    title: "Hriday Na Dard Ni",
+    artist: "Manhar Udhas",
+    youtubeId: "T6JMgA_l3m4",
+  },
+  {
+    id: "song-24",
+    title: "Shant Zarukhe",
+    artist: "Manhar Udhas",
+    youtubeId: "L5xehAJZis4",
+  },
+  {
+    id: "song-25",
+    title: "Biji To Koi Rite",
+    artist: "Manhar Udhas",
+    youtubeId: "OorUG9lbAuI",
+  },
+  {
+    id: "song-26",
+    title: "Jyare Pranay Ni Jagma",
+    artist: "Manhar Udhas",
+    youtubeId: "DyzX_K5XBCU",
+  },
 ];
 
 export default bethakPlaylist;
