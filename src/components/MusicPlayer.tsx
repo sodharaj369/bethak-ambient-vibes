@@ -213,13 +213,13 @@ export function MusicPlayer() {
           tracks={bethakPlaylist}
           currentIndex={state.index}
           shuffle={state.shuffle}
-          repeat={state.repeat}
+          repeatMode={state.repeatMode}
           onSelect={(i) => {
             engine.playAt(i);
             setOpen(false);
           }}
           onToggleShuffle={() => engine.setShuffle(!state.shuffle)}
-          onToggleRepeat={() => engine.setRepeat(!state.repeat)}
+          onCycleRepeat={() => engine.cycleRepeat()}
           onClose={() => setOpen(false)}
         />
       )}

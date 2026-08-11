@@ -297,8 +297,10 @@ export class YouTubeEngine implements MusicEngine {
       this.cursor += 1;
     } else if (this.repeatMode !== "off") {
       if (this.shuffle) {
-        const first = this.order[0]!;
-        this.buildOrder(first);
+        // New sequence, avoiding restarting on the track that just ended.
+        const others = this.order.filter((i) => i !== this.index);
+        const start = others.length ? others[Math.floor(Math.random() * others.length)]! : this.index;
+        this.buildOrder(start);
         this.cursor = 0;
       } else {
         this.cursor = 0;
