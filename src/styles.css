@@ -347,6 +347,7 @@
 
 @utility artwork {
   display: grid;
+  animation: track-fade 300ms ease;
   place-items: center;
   height: 56px;
   width: 56px;
@@ -366,7 +367,7 @@
 @utility track-meta {
   min-width: 0;
   flex: 1;
-  animation: track-fade 500ms ease;
+  animation: track-fade 300ms ease;
 }
 
 @keyframes track-fade {
