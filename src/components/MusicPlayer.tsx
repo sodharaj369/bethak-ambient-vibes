@@ -39,18 +39,19 @@ function PauseIcon() {
 }
 
 export function MusicPlayer() {
-  const provider = useMemo(() => new MockMusicProvider(bethakPlaylist), []);
-  const [state, setState] = useState<PlayerState>(() => provider.getState());
+  const engine = useMemo(() => new HtmlAudioEngine(bethakPlaylist), []);
+  const [state, setState] = useState<PlayerState>(() => engine.getState());
 
   useEffect(() => {
-    const unsub = provider.subscribe(setState);
+    const unsub = engine.subscribe(setState);
     return () => {
       unsub();
-      provider.dispose();
+      engine.dispose();
     };
-  }, [provider]);
+  }, [engine]);
 
   const pct = state.duration ? (state.position / state.duration) * 100 : 0;
+
 
   return (
     <div className="player-shell">
