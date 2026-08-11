@@ -176,12 +176,17 @@
   transform: translate(-42%, -50%);
   width: max(100vw, calc(100dvh * 1.791));
   height: max(100dvh, calc(100vw / 1.791));
-  animation: bethak-breathe 34s ease-in-out infinite;
-  transform-origin: 60% 55%;
   @media (min-width: 768px) {
     left: 50%;
     transform: translate(-50%, -50%);
   }
+}
+
+@utility room-breathe {
+  position: absolute;
+  inset: 0;
+  animation: bethak-breathe 34s ease-in-out infinite;
+  transform-origin: 60% 55%;
 }
 
 @utility ambience {
