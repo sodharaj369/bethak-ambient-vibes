@@ -124,7 +124,7 @@ export class YouTubeEngine implements MusicEngine {
     });
     // Reads live player time — no simulated progress.
     this.ticker = setInterval(() => {
-      if (this.ready) this.emit();
+      if (this.ready) { console.log('[bethak] tick', this.player?.getCurrentTime(), this.settling, this.listeners.size); this.emit(); }
     }, 250);
   }
 
