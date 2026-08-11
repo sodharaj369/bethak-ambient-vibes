@@ -77,19 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "बैठक — BETHAK · a late-night ghazal room" },
+      { title: "बैठक BETHAK — Late-Night Ghazal Radio Room" },
       { name: "description", content: "A quiet digital baithak. Chai, a harmonium and old Hindi ghazals in a warm, moonlit Indian sitting room." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "बैठक — BETHAK · a late-night ghazal room" },
-      { property: "og:description", content: "A quiet digital baithak. Chai, a harmonium and old Hindi ghazals in a warm, moonlit Indian sitting room." },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "BETHAK" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "बैठक — BETHAK · a late-night ghazal room" },
-      { name: "twitter:description", content: "A quiet digital baithak. Chai, a harmonium and old Hindi ghazals in a warm, moonlit Indian sitting room." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/203ee2ffb2df3ab500cb78974f55721e/id-preview-de424624--6701c47f-b796-4d87-b4ab-aa45a2a7709d.lovable.app-1786444994186.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/203ee2ffb2df3ab500cb78974f55721e/id-preview-de424624--6701c47f-b796-4d87-b4ab-aa45a2a7709d.lovable.app-1786444994186.png" },
     ],
+
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
