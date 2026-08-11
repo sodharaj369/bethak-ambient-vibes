@@ -29,7 +29,7 @@ export function BethakBackground() {
       <div className="room-frame">
         <div className="room-breathe">
         <img
-          src={roomAsset.url}
+          src={roomImage}
           alt="A quiet Indian sitting room at night: a wooden diwan with cushions, chai on a low table, a harmonium, a warm lamp and a moonlit window"
           className="h-full w-full object-cover"
         />
