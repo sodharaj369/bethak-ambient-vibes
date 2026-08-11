@@ -180,6 +180,9 @@ export class YouTubeEngine implements MusicEngine {
       position: this.getCurrentTime(),
       duration: this.getDuration(),
       canPlay: this.ready,
+      shuffle: this.shuffle,
+      repeat: this.repeat,
+
     };
   }
 
