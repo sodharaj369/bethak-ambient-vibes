@@ -85,6 +85,7 @@ export class YouTubeEngine implements MusicEngine {
 
   constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
     this.tracks = tracks;
+    console.log('[bethak] construct');
     if (typeof window === "undefined") return;
     void loadYouTubeApi().then((YT) => {
       if (this.disposed || !YT?.Player) return;
@@ -122,7 +123,7 @@ export class YouTubeEngine implements MusicEngine {
     });
     // Reads live player time — no simulated progress.
     this.ticker = setInterval(() => {
-      if (this.ready) this.emit();
+      if (this.ready) { console.log('[bethak] tick', this.player?.getCurrentTime(), this.player?.getPlayerState()); this.emit(); }
     }, 250);
   }
 
