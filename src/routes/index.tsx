@@ -8,7 +8,7 @@ import { EXTERNAL_LINKS } from "@/data/playlist";
 const SITE_URL = "https://bethak-ambient-vibes.lovable.app";
 const OG_IMAGE =
   "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/203ee2ffb2df3ab500cb78974f55721e/id-preview-de424624--6701c47f-b796-4d87-b4ab-aa45a2a7709d.lovable.app-1786444994186.png";
-const TITLE = "बैठक BETHAK — Late-Night Ghazal Radio Room";
+const TITLE = "बैठक — ग़ज़लें • चाय • थोड़ी देर बैठो";
 const DESCRIPTION =
   "Bethak is a quiet late-night ghazal room: press play for old Hindi ghazals by Jagjit Singh, Mehdi Hassan and Ghulam Ali in a warm, moonlit Indian sitting room.";
 
