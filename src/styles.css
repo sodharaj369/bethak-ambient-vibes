@@ -312,13 +312,36 @@
 }
 
 @utility text-subtitle {
-  color: oklch(0.95 0.02 80 / 0.78);
+  color: oklch(0.95 0.02 80 / 0.85);
   font-size: clamp(0.875rem, 1.8vw, 0.95rem);
   line-height: 1.45;
   font-weight: 400;
   letter-spacing: 0.09em;
   text-shadow: 0 1px 10px oklch(0.2 0.03 60 / 0.35);
 }
+
+@utility text-h1-desc {
+  display: block;
+  font-size: clamp(0.7rem, 2vw, 0.92rem);
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: oklch(0.95 0.02 80 / 0.86);
+  margin-top: 0.55rem;
+  text-shadow: 0 1px 10px oklch(0.2 0.03 60 / 0.35);
+}
+
+@utility bethak-desc {
+  max-width: 440px;
+  padding: 0 16px;
+  font-size: clamp(0.76rem, 1.5vw, 0.86rem);
+  line-height: 1.6;
+  color: oklch(0.94 0.015 80 / 0.72);
+  text-shadow: 0 1px 8px oklch(0.2 0.03 60 / 0.35);
+  text-align: center;
+}
+
 
 @utility yt-host {
   position: fixed;
