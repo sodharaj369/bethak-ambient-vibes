@@ -290,6 +290,9 @@
   justify-content: center;
   z-index: 10;
   pointer-events: none;
+  @media (min-width: 768px) {
+    top: 16%;
+  }
 }
 
 @utility text-title {
