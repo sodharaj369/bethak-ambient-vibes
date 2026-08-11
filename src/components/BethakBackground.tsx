@@ -4,7 +4,7 @@ export function BethakBackground() {
   return (
     <div className="absolute inset-0 -z-10 overflow-hidden">
       <img
-        src={roomAsset.url}
+        src={roomUrl}
         alt="A quiet Indian sitting room at night: a wooden diwan with cushions, chai on a low table, a harmonium, a warm lamp and a moonlit window"
         className="room-image h-full w-full object-cover object-[42%_center] md:object-center"
       />
