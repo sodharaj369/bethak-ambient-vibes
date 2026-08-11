@@ -219,9 +219,77 @@ export class YouTubeEngine implements MusicEngine {
     this.emit();
   }
 
+  /** Rebuilds the playback sequence. Never mutates the source playlist. */
+  private buildOrder(startAt: number) {
+    const n = this.tracks.length;
+    const rest = Array.from({ length: n }, (_, i) => i).filter((i) => i !== startAt);
+    if (this.shuffle) {
+      for (let i = rest.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rest[i], rest[j]] = [rest[j]!, rest[i]!];
+      }
+      this.order = [startAt, ...rest];
+      this.cursor = 0;
+    } else {
+      this.order = Array.from({ length: n }, (_, i) => i);
+      this.cursor = Math.max(0, this.order.indexOf(startAt));
+    }
+  }
+
+  private ensureOrder() {
+    if (this.order.length !== this.tracks.length) this.buildOrder(this.index);
+  }
+
+  setShuffle(on: boolean) {
+    this.shuffle = on;
+    this.buildOrder(this.index);
+    this.emit();
+  }
+
+  setRepeat(on: boolean) {
+    this.repeat = on;
+    this.emit();
+  }
+
+  getTracks(): MusicTrack[] {
+    return this.tracks;
+  }
+
+  /** Plays a specific playlist index (playlist panel selection). */
+  playAt(index: number) {
+    if (index < 0 || index >= this.tracks.length) return;
+    this.index = index;
+    if (this.shuffle) {
+      // Keep the shuffled sequence, but continue from the chosen track.
+      const at = this.order.indexOf(index);
+      if (at >= 0) this.cursor = at;
+      else this.buildOrder(index);
+    } else {
+      this.ensureOrder();
+      this.cursor = this.order.indexOf(index);
+    }
+    this.load(true);
+  }
+
   next() {
     const wasPlaying = this.playing || this.wantPlay;
-    this.index = (this.index + 1) % this.tracks.length;
+    this.ensureOrder();
+    if (this.cursor < this.order.length - 1) {
+      this.cursor += 1;
+    } else if (this.repeat) {
+      if (this.shuffle) {
+        const first = this.order[0]!;
+        this.buildOrder(first);
+        this.cursor = 0;
+      } else {
+        this.cursor = 0;
+      }
+    } else {
+      // End of the sitting: stop rather than loop.
+      this.pause();
+      return;
+    }
+    this.index = this.order[this.cursor] ?? 0;
     this.load(wasPlaying);
   }
 
@@ -231,9 +299,12 @@ export class YouTubeEngine implements MusicEngine {
       this.seek(0);
       return;
     }
-    this.index = (this.index - 1 + this.tracks.length) % this.tracks.length;
+    this.ensureOrder();
+    this.cursor = this.cursor > 0 ? this.cursor - 1 : this.order.length - 1;
+    this.index = this.order[this.cursor] ?? 0;
     this.load(wasPlaying);
   }
+
 
   seek(seconds: number) {
     if (!this.ready || !this.player || this.settling) return;
