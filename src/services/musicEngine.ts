@@ -95,11 +95,13 @@ export class YouTubeEngine implements MusicEngine {
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
         events: {
           onReady: () => {
+            console.log('[bethak] onReady');
             this.ready = true;
             if (this.wantPlay) this.player?.playVideo();
             this.emit();
           },
           onStateChange: (e: { data: number }) => {
+            console.log('[bethak] state', e.data);
             // -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
             if (e.data === 0) {
               this.next();
@@ -177,6 +179,7 @@ export class YouTubeEngine implements MusicEngine {
   }
 
   async play() {
+    console.log('[bethak] play()', this.ready, !!this.player);
     this.wantPlay = true;
     if (this.ready) this.player?.playVideo();
     this.emit();
