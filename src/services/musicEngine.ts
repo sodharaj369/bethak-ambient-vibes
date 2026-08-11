@@ -89,6 +89,8 @@ export class YouTubeEngine implements MusicEngine {
     void loadYouTubeApi().then((YT) => {
       if (this.disposed || !YT?.Player) return;
       this.player = new YT.Player(hostId, {
+        width: 200,
+        height: 200,
         videoId: this.getCurrentTrack().youtubeId,
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
         events: {

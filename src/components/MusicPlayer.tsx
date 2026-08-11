@@ -73,10 +73,9 @@ export function MusicPlayer() {
 
   useEffect(() => {
     const unsub = engine.subscribe(setState);
-    return () => {
-      unsub();
-      engine.dispose();
-    };
+    // Only unsubscribe here: the engine owns the YouTube player for the page
+    // lifetime, so a dev-mode remount must not tear the real player down.
+    return unsub;
   }, [engine]);
 
   const pct = state.duration ? Math.min(100, (state.position / state.duration) * 100) : 0;
