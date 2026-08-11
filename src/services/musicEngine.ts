@@ -19,6 +19,8 @@ export interface MusicEngine {
   dispose(): void;
 }
 
+export type RepeatMode = "off" | "playlist" | "song";
+
 export type PlayerState = {
   index: number;
   track: MusicTrack;
@@ -28,7 +30,7 @@ export type PlayerState = {
   /** False until the YouTube player is ready. */
   canPlay: boolean;
   shuffle: boolean;
-  repeat: boolean;
+  repeatMode: RepeatMode;
 };
 
 
