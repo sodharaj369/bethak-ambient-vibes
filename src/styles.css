@@ -272,10 +272,12 @@
 
 @utility yt-host {
   position: fixed;
-  left: -9999px;
+  left: 0;
   bottom: 0;
   width: 200px;
   height: 200px;
+  opacity: 0.01;
+  z-index: -1;
   pointer-events: none;
 }
 
@@ -363,12 +365,20 @@
 }
 
 @utility progress {
+  position: relative;
+  cursor: pointer;
+  touch-action: none;
   margin-top: 8px;
   height: 2px;
   width: 100%;
   border-radius: 9999px;
   background: oklch(0.98 0.01 85 / 0.18);
-  overflow: hidden;
+  /* Invisible taller hit area for mouse/touch seeking — no visual change. */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -9px 0;
+  }
   & > span {
     display: block;
     height: 100%;

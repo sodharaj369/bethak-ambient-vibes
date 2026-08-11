@@ -78,6 +78,9 @@ export class YouTubeEngine implements MusicEngine {
   private wantPlay = false;
   private listeners = new Set<(s: PlayerState) => void>();
   private ticker: ReturnType<typeof setInterval> | null = null;
+  /** True between loading a track and the player reporting the new one. */
+  private settling = false;
+  private errorStreak = 0;
   private disposed = false;
 
   constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
@@ -86,6 +89,8 @@ export class YouTubeEngine implements MusicEngine {
     void loadYouTubeApi().then((YT) => {
       if (this.disposed || !YT?.Player) return;
       this.player = new YT.Player(hostId, {
+        width: 200,
+        height: 200,
         videoId: this.getCurrentTrack().youtubeId,
         playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
         events: {
@@ -95,39 +100,54 @@ export class YouTubeEngine implements MusicEngine {
             this.emit();
           },
           onStateChange: (e: { data: number }) => {
-            // 1 = playing, 2 = paused, 0 = ended
+            // -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
             if (e.data === 0) {
               this.next();
               return;
             }
-            this.playing = e.data === 1;
+            if (e.data === 1 || e.data === 5) this.settling = false;
+            if (e.data === 1) this.errorStreak = 0;
+            if (e.data === 1 || e.data === 2) this.playing = e.data === 1;
             this.emit();
           },
           onError: () => {
+            // Unplayable video (embedding/region/deleted): never pretend it plays.
             this.playing = false;
             this.emit();
+            this.errorStreak += 1;
+            if (this.errorStreak < this.tracks.length) this.next();
           },
         },
       }) as YTPlayer;
     });
     // Reads live player time — no simulated progress.
     this.ticker = setInterval(() => {
-      if (this.ready && this.playing) this.emit();
-    }, 500);
+      if (this.ready) this.emit();
+    }, 250);
   }
 
   getCurrentTrack(): MusicTrack {
     return this.tracks[this.index] as MusicTrack;
   }
 
+  /** Clears the post-load guard as soon as the player reports the new video. */
+  private checkSettled() {
+    if (!this.settling || !this.player) return;
+    const d = this.player.getDuration();
+    const t = this.player.getCurrentTime();
+    if (Number.isFinite(d) && d > 0 && Number.isFinite(t) && t < 2) this.settling = false;
+  }
+
   getCurrentTime(): number {
-    if (!this.ready || !this.player) return 0;
+    this.checkSettled();
+    if (!this.ready || !this.player || this.settling) return 0;
     const t = this.player.getCurrentTime();
     return Number.isFinite(t) ? t : 0;
   }
 
   getDuration(): number {
-    if (!this.ready || !this.player) return 0;
+    this.checkSettled();
+    if (!this.ready || !this.player || this.settling) return 0;
     const d = this.player.getDuration();
     return Number.isFinite(d) ? d : 0;
   }
@@ -171,6 +191,8 @@ export class YouTubeEngine implements MusicEngine {
   private load(autoplay: boolean) {
     const id = this.getCurrentTrack().youtubeId;
     this.wantPlay = autoplay;
+    this.settling = true;
+    this.playing = false;
     if (!this.ready || !this.player) return this.emit();
     if (autoplay) this.player.loadVideoById(id);
     else this.player.cueVideoById(id);
@@ -194,7 +216,7 @@ export class YouTubeEngine implements MusicEngine {
   }
 
   seek(seconds: number) {
-    if (!this.ready || !this.player) return;
+    if (!this.ready || !this.player || this.settling) return;
     const d = this.getDuration();
     this.player.seekTo(Math.max(0, d ? Math.min(seconds, d) : seconds), true);
     this.emit();
@@ -212,4 +234,15 @@ export class YouTubeEngine implements MusicEngine {
     this.player = null;
     this.listeners.clear();
   }
+}
+
+/**
+ * One engine per page. React can construct components twice in development;
+ * a second YouTube player on the same host element would leave the UI bound to
+ * a stale, non-playing player object.
+ */
+let singleton: YouTubeEngine | null = null;
+export function getYouTubeEngine(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
+  if (!singleton) singleton = new YouTubeEngine(hostId, tracks);
+  return singleton;
 }
