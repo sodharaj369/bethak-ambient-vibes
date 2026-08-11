@@ -78,6 +78,9 @@ export class YouTubeEngine implements MusicEngine {
   private wantPlay = false;
   private listeners = new Set<(s: PlayerState) => void>();
   private ticker: ReturnType<typeof setInterval> | null = null;
+  /** True between loading a track and the player reporting the new one. */
+  private settling = false;
+  private errorStreak = 0;
   private disposed = false;
 
   constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
@@ -95,25 +98,30 @@ export class YouTubeEngine implements MusicEngine {
             this.emit();
           },
           onStateChange: (e: { data: number }) => {
-            // 1 = playing, 2 = paused, 0 = ended
+            // -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
             if (e.data === 0) {
               this.next();
               return;
             }
-            this.playing = e.data === 1;
+            if (e.data === 1 || e.data === 5) this.settling = false;
+            if (e.data === 1) this.errorStreak = 0;
+            if (e.data === 1 || e.data === 2) this.playing = e.data === 1;
             this.emit();
           },
           onError: () => {
+            // Unplayable video (embedding/region/deleted): never pretend it plays.
             this.playing = false;
             this.emit();
+            this.errorStreak += 1;
+            if (this.errorStreak < this.tracks.length) this.next();
           },
         },
       }) as YTPlayer;
     });
     // Reads live player time — no simulated progress.
     this.ticker = setInterval(() => {
-      if (this.ready && this.playing) this.emit();
-    }, 500);
+      if (this.ready) this.emit();
+    }, 250);
   }
 
   getCurrentTrack(): MusicTrack {
@@ -121,13 +129,13 @@ export class YouTubeEngine implements MusicEngine {
   }
 
   getCurrentTime(): number {
-    if (!this.ready || !this.player) return 0;
+    if (!this.ready || !this.player || this.settling) return 0;
     const t = this.player.getCurrentTime();
     return Number.isFinite(t) ? t : 0;
   }
 
   getDuration(): number {
-    if (!this.ready || !this.player) return 0;
+    if (!this.ready || !this.player || this.settling) return 0;
     const d = this.player.getDuration();
     return Number.isFinite(d) ? d : 0;
   }
@@ -171,6 +179,8 @@ export class YouTubeEngine implements MusicEngine {
   private load(autoplay: boolean) {
     const id = this.getCurrentTrack().youtubeId;
     this.wantPlay = autoplay;
+    this.settling = true;
+    this.playing = false;
     if (!this.ready || !this.player) return this.emit();
     if (autoplay) this.player.loadVideoById(id);
     else this.player.cueVideoById(id);
@@ -194,7 +204,7 @@ export class YouTubeEngine implements MusicEngine {
   }
 
   seek(seconds: number) {
-    if (!this.ready || !this.player) return;
+    if (!this.ready || !this.player || this.settling) return;
     const d = this.getDuration();
     this.player.seekTo(Math.max(0, d ? Math.min(seconds, d) : seconds), true);
     this.emit();
