@@ -86,21 +86,24 @@ export function MusicPlayer() {
               {fmt(state.position)} / {fmt(state.duration)}
             </span>
             <div className="controls">
-              <button type="button" className="ctl" aria-label="Previous track" onClick={() => provider.previous()}>
+              <button type="button" className="ctl" aria-label="Previous track" onClick={() => engine.previous()}>
                 <PrevIcon />
               </button>
               <button
                 type="button"
                 className="ctl ctl-main"
                 aria-label={state.isPlaying ? "Pause" : "Play"}
-                onClick={() => (state.isPlaying ? provider.pause() : provider.play())}
+                title={state.canPlay ? undefined : "Playback available once an audio source is connected"}
+                aria-disabled={!state.canPlay}
+                onClick={() => (state.isPlaying ? engine.pause() : void engine.play())}
               >
                 {state.isPlaying ? <PauseIcon /> : <PlayIcon />}
               </button>
-              <button type="button" className="ctl" aria-label="Next track" onClick={() => provider.next()}>
+              <button type="button" className="ctl" aria-label="Next track" onClick={() => engine.next()}>
                 <NextIcon />
               </button>
             </div>
+
           </div>
         </div>
       </div>
