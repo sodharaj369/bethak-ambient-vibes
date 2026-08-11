@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://bethak-ambient-vibes.lovable.app/sitemap.xml
