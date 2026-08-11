@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getYouTubeEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist } from "@/data/playlist";
+import { PlaylistPanel } from "@/components/PlaylistPanel";
 
 function fmt(s: number) {
   if (!Number.isFinite(s) || s < 0) s = 0;
@@ -44,6 +45,14 @@ function NoteIcon() {
     </svg>
   );
 }
+function ListIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true">
+      <path d="M3 6h12v2H3zM3 11h12v2H3zM3 16h8v2H3zM17 10v7.2a2.6 2.6 0 1 0 1.6 2.4V13h2.4v-3z" />
+    </svg>
+  );
+}
+
 
 const YT_HOST_ID = "bethak-yt-host";
 
@@ -80,6 +89,7 @@ function Artwork({
 export function MusicPlayer() {
   const engine = useMemo(() => getYouTubeEngine(YT_HOST_ID, bethakPlaylist), []);
   const [state, setState] = useState<PlayerState>(() => engine.getState());
+  const [open, setOpen] = useState(false);
   const barRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
 
@@ -173,7 +183,7 @@ export function MusicPlayer() {
               </button>
               <button
                 type="button"
-                className={`ctl ctl-main${state.isPlaying ? " ctl-breathing" : ""}`}
+                className={`ctl ctl-main ${state.isPlaying ? "ctl-breathing" : ""}`}
                 aria-label={state.isPlaying ? "Pause" : "Play"}
                 title={state.canPlay ? undefined : "Connecting to YouTube player…"}
                 aria-disabled={!state.canPlay}
@@ -184,10 +194,36 @@ export function MusicPlayer() {
               <button type="button" className="ctl" aria-label="Next track" onClick={() => engine.next()}>
                 <NextIcon />
               </button>
+              <button
+                type="button"
+                className="ctl"
+                aria-label="Open playlist"
+                aria-expanded={open}
+                onClick={() => setOpen(true)}
+              >
+                <ListIcon />
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {open && (
+        <PlaylistPanel
+          tracks={bethakPlaylist}
+          currentIndex={state.index}
+          shuffle={state.shuffle}
+          repeat={state.repeat}
+          onSelect={(i) => {
+            engine.playAt(i);
+            setOpen(false);
+          }}
+          onToggleShuffle={() => engine.setShuffle(!state.shuffle)}
+          onToggleRepeat={() => engine.setRepeat(!state.repeat)}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   );
 }
+
