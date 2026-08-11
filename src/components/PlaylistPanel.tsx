@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { MusicTrack } from "@/data/playlist";
+import type { RepeatMode } from "@/services/musicEngine";
 
 function ShuffleIcon() {
   return (
@@ -8,10 +9,11 @@ function ShuffleIcon() {
     </svg>
   );
 }
-function RepeatIcon() {
+function RepeatIcon({ one }: { one?: boolean }) {
   return (
     <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
       <path d="M7 5.6h9V3l4.5 3.6L16 10.2V7.6H7.6v2.6L4 7.6l3-2zM17 18.4H8V21l-4.5-3.6L8 13.8v2.6h8.4v-2.6l3.6 3.6-3 1z" />
+      {one && <path d="M11.1 10.2h1.1v3.6h-1V11.2l-.9.3-.2-.8 1-.5z" />}
     </svg>
   );
 }
@@ -27,10 +29,10 @@ type Props = {
   tracks: MusicTrack[];
   currentIndex: number;
   shuffle: boolean;
-  repeat: boolean;
+  repeatMode: RepeatMode;
   onSelect: (index: number) => void;
   onToggleShuffle: () => void;
-  onToggleRepeat: () => void;
+  onCycleRepeat: () => void;
   onClose: () => void;
 };
 
@@ -38,10 +40,10 @@ export function PlaylistPanel({
   tracks,
   currentIndex,
   shuffle,
-  repeat,
+  repeatMode,
   onSelect,
   onToggleShuffle,
-  onToggleRepeat,
+  onCycleRepeat,
   onClose,
 }: Props) {
   useEffect(() => {
@@ -80,13 +82,19 @@ export function PlaylistPanel({
           </button>
           <button
             type="button"
-            className={`mode-btn ${repeat ? "mode-on" : ""}`}
-            aria-label="Repeat playlist"
-            aria-pressed={repeat}
-            onClick={onToggleRepeat}
+            className={`mode-btn ${repeatMode !== "off" ? "mode-on" : ""}`}
+            aria-label={
+              repeatMode === "song"
+                ? "Repeat current song"
+                : repeatMode === "playlist"
+                  ? "Repeat playlist"
+                  : "Repeat off"
+            }
+            aria-pressed={repeatMode !== "off"}
+            onClick={onCycleRepeat}
           >
-            <RepeatIcon />
-            <span>Repeat</span>
+            <RepeatIcon one={repeatMode === "song"} />
+            <span>{repeatMode === "song" ? "Repeat song" : "Repeat"}</span>
           </button>
         </div>
 

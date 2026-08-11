@@ -19,6 +19,8 @@ export interface MusicEngine {
   dispose(): void;
 }
 
+export type RepeatMode = "off" | "playlist" | "song";
+
 export type PlayerState = {
   index: number;
   track: MusicTrack;
@@ -28,7 +30,7 @@ export type PlayerState = {
   /** False until the YouTube player is ready. */
   canPlay: boolean;
   shuffle: boolean;
-  repeat: boolean;
+  repeatMode: RepeatMode;
 };
 
 
@@ -95,7 +97,7 @@ export class YouTubeEngine implements MusicEngine {
   private errorStreak = 0;
   private disposed = false;
   private shuffle = false;
-  private repeat = false;
+  private repeatMode: RepeatMode = "off";
   /** Playback sequence of playlist indices; identity unless shuffling. */
   private order: number[] = [];
   private cursor = 0;
@@ -122,7 +124,7 @@ export class YouTubeEngine implements MusicEngine {
           onStateChange: (e: { data: number }) => {
             // -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
             if (e.data === 0) {
-              this.next();
+              this.handleEnded();
               return;
             }
             if (e.data === 1 || e.data === 5) this.settling = false;
@@ -181,8 +183,7 @@ export class YouTubeEngine implements MusicEngine {
       duration: this.getDuration(),
       canPlay: this.ready,
       shuffle: this.shuffle,
-      repeat: this.repeat,
-
+      repeatMode: this.repeatMode,
     };
   }
 
@@ -249,9 +250,24 @@ export class YouTubeEngine implements MusicEngine {
     this.emit();
   }
 
-  setRepeat(on: boolean) {
-    this.repeat = on;
+  setRepeatMode(mode: RepeatMode) {
+    this.repeatMode = mode;
     this.emit();
+  }
+
+  cycleRepeat() {
+    this.repeatMode =
+      this.repeatMode === "off" ? "playlist" : this.repeatMode === "playlist" ? "song" : "off";
+    this.emit();
+  }
+
+  /** Single central decision point for what happens when a track ends. */
+  private handleEnded() {
+    if (this.repeatMode === "song") {
+      this.load(true);
+      return;
+    }
+    this.next();
   }
 
   getTracks(): MusicTrack[] {
@@ -279,10 +295,12 @@ export class YouTubeEngine implements MusicEngine {
     this.ensureOrder();
     if (this.cursor < this.order.length - 1) {
       this.cursor += 1;
-    } else if (this.repeat) {
+    } else if (this.repeatMode !== "off") {
       if (this.shuffle) {
-        const first = this.order[0]!;
-        this.buildOrder(first);
+        // New sequence, avoiding restarting on the track that just ended.
+        const others = this.order.filter((i) => i !== this.index);
+        const start = others.length ? others[Math.floor(Math.random() * others.length)]! : this.index;
+        this.buildOrder(start);
         this.cursor = 0;
       } else {
         this.cursor = 0;
