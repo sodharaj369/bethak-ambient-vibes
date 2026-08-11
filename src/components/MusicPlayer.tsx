@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { HtmlAudioEngine, type PlayerState } from "@/services/musicEngine";
+import { YouTubeEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist } from "@/data/playlist";
 
 
@@ -38,8 +38,10 @@ function PauseIcon() {
   );
 }
 
+const YT_HOST_ID = "bethak-yt-host";
+
 export function MusicPlayer() {
-  const engine = useMemo(() => new HtmlAudioEngine(bethakPlaylist), []);
+  const engine = useMemo(() => new YouTubeEngine(YT_HOST_ID, bethakPlaylist), []);
   const [state, setState] = useState<PlayerState>(() => engine.getState());
 
   useEffect(() => {
@@ -55,6 +57,10 @@ export function MusicPlayer() {
 
   return (
     <div className="player-shell">
+      {/* Official YouTube IFrame Player API host — the real playback engine. */}
+      <div className="yt-host" aria-hidden="true">
+        <div id={YT_HOST_ID} />
+      </div>
       <div className="player" role="group" aria-label="Bethak music player">
         <div className="artwork">
           <img
@@ -93,7 +99,7 @@ export function MusicPlayer() {
                 type="button"
                 className="ctl ctl-main"
                 aria-label={state.isPlaying ? "Pause" : "Play"}
-                title={state.canPlay ? undefined : "Playback available once an audio source is connected"}
+                title={state.canPlay ? undefined : "Connecting to YouTube player…"}
                 aria-disabled={!state.canPlay}
                 onClick={() => (state.isPlaying ? engine.pause() : void engine.play())}
               >
