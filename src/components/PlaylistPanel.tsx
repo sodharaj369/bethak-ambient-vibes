@@ -70,7 +70,7 @@ export function PlaylistPanel({
         <div className="panel-modes">
           <button
             type="button"
-            className={`mode-btn${shuffle ? " mode-on" : ""}`}
+            className={`mode-btn ${shuffle ? "mode-on" : ""}`}
             aria-label="Shuffle"
             aria-pressed={shuffle}
             onClick={onToggleShuffle}
@@ -80,7 +80,7 @@ export function PlaylistPanel({
           </button>
           <button
             type="button"
-            className={`mode-btn${repeat ? " mode-on" : ""}`}
+            className={`mode-btn ${repeat ? "mode-on" : ""}`}
             aria-label="Repeat playlist"
             aria-pressed={repeat}
             onClick={onToggleRepeat}
@@ -95,7 +95,7 @@ export function PlaylistPanel({
             <li key={t.id}>
               <button
                 type="button"
-                className={`panel-item${i === currentIndex ? " panel-item-active" : ""}`}
+                className={`panel-item ${i === currentIndex ? "panel-item-active" : ""}`}
                 aria-current={i === currentIndex}
                 onClick={() => onSelect(i)}
               >

@@ -183,7 +183,7 @@ export function MusicPlayer() {
               </button>
               <button
                 type="button"
-                className={`ctl ctl-main${state.isPlaying ? " ctl-breathing" : ""}`}
+                className={`ctl ctl-main ${state.isPlaying ? "ctl-breathing" : ""}`}
                 aria-label={state.isPlaying ? "Pause" : "Play"}
                 title={state.canPlay ? undefined : "Connecting to YouTube player…"}
                 aria-disabled={!state.canPlay}
