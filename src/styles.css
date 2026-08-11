@@ -272,10 +272,12 @@
 
 @utility yt-host {
   position: fixed;
-  left: -9999px;
+  left: 0;
   bottom: 0;
   width: 200px;
   height: 200px;
+  opacity: 0.01;
+  z-index: -1;
   pointer-events: none;
 }
 
