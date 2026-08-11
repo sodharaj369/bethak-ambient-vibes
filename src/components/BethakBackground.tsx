@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import roomAsset from "@/assets/bethak-room.png.asset.json";
+import roomImage from "@/assets/bethak-room.webp";
 import { RoomAmbience } from "@/components/RoomAmbience";
 
 type Phase = "evening" | "night" | "late" | "deep";
