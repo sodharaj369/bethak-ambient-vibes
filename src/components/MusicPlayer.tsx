@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { MockMusicProvider, type PlayerState } from "@/services/musicProvider";
+import { HtmlAudioEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist } from "@/data/playlist";
+
 
 function fmt(s: number) {
   const m = Math.floor(s / 60);
@@ -38,18 +39,19 @@ function PauseIcon() {
 }
 
 export function MusicPlayer() {
-  const provider = useMemo(() => new MockMusicProvider(bethakPlaylist), []);
-  const [state, setState] = useState<PlayerState>(() => provider.getState());
+  const engine = useMemo(() => new HtmlAudioEngine(bethakPlaylist), []);
+  const [state, setState] = useState<PlayerState>(() => engine.getState());
 
   useEffect(() => {
-    const unsub = provider.subscribe(setState);
+    const unsub = engine.subscribe(setState);
     return () => {
       unsub();
-      provider.dispose();
+      engine.dispose();
     };
-  }, [provider]);
+  }, [engine]);
 
   const pct = state.duration ? (state.position / state.duration) * 100 : 0;
+
 
   return (
     <div className="player-shell">
@@ -84,21 +86,24 @@ export function MusicPlayer() {
               {fmt(state.position)} / {fmt(state.duration)}
             </span>
             <div className="controls">
-              <button type="button" className="ctl" aria-label="Previous track" onClick={() => provider.previous()}>
+              <button type="button" className="ctl" aria-label="Previous track" onClick={() => engine.previous()}>
                 <PrevIcon />
               </button>
               <button
                 type="button"
                 className="ctl ctl-main"
                 aria-label={state.isPlaying ? "Pause" : "Play"}
-                onClick={() => (state.isPlaying ? provider.pause() : provider.play())}
+                title={state.canPlay ? undefined : "Playback available once an audio source is connected"}
+                aria-disabled={!state.canPlay}
+                onClick={() => (state.isPlaying ? engine.pause() : void engine.play())}
               >
                 {state.isPlaying ? <PauseIcon /> : <PlayIcon />}
               </button>
-              <button type="button" className="ctl" aria-label="Next track" onClick={() => provider.next()}>
+              <button type="button" className="ctl" aria-label="Next track" onClick={() => engine.next()}>
                 <NextIcon />
               </button>
             </div>
+
           </div>
         </div>
       </div>
