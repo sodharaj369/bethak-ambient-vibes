@@ -94,6 +94,12 @@ export class YouTubeEngine implements MusicEngine {
   private settling = false;
   private errorStreak = 0;
   private disposed = false;
+  private shuffle = false;
+  private repeat = false;
+  /** Playback sequence of playlist indices; identity unless shuffling. */
+  private order: number[] = [];
+  private cursor = 0;
+
 
   constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
     this.tracks = tracks;
