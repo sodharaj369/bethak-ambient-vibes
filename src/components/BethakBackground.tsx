@@ -1,4 +1,4 @@
-import roomUrl from "@/assets/bethak-room-clean.webp";
+import roomAsset from "@/assets/bethak-room.png.asset.json";
 
 export function BethakBackground() {
   return (
