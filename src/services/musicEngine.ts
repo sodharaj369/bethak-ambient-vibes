@@ -128,13 +128,23 @@ export class YouTubeEngine implements MusicEngine {
     return this.tracks[this.index] as MusicTrack;
   }
 
+  /** Clears the post-load guard as soon as the player reports the new video. */
+  private checkSettled() {
+    if (!this.settling || !this.player) return;
+    const d = this.player.getDuration();
+    const t = this.player.getCurrentTime();
+    if (Number.isFinite(d) && d > 0 && Number.isFinite(t) && t < 2) this.settling = false;
+  }
+
   getCurrentTime(): number {
+    this.checkSettled();
     if (!this.ready || !this.player || this.settling) return 0;
     const t = this.player.getCurrentTime();
     return Number.isFinite(t) ? t : 0;
   }
 
   getDuration(): number {
+    this.checkSettled();
     if (!this.ready || !this.player || this.settling) return 0;
     const d = this.player.getDuration();
     return Number.isFinite(d) ? d : 0;
