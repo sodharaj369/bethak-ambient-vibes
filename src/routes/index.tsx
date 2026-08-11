@@ -14,10 +14,10 @@ export const Route = createFileRoute("/")({
         content:
           "A quiet digital baithak. Chai, a harmonium and old Hindi ghazals in a warm, moonlit Indian sitting room.",
       },
-      { property: "og:title", content: "बैठक — BETHAK" },
+      { property: "og:title", content: "बैठक — BETHAK · a late-night ghazal room" },
       {
         property: "og:description",
-        content: "Sit, sip chai and listen to ghazals in a quiet late-night Indian sitting room.",
+        content: "A quiet digital baithak. Chai, a harmonium and old Hindi ghazals in a warm, moonlit Indian sitting room.",
       },
     ],
   }),
