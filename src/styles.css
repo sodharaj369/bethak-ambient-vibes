@@ -167,10 +167,29 @@
   overflow: hidden;
 }
 
-@utility room-image {
+/* Mirrors object-cover so percentage-positioned ambient overlays line up
+   with the illustration at every viewport size. */
+@utility room-frame {
+  position: absolute;
+  top: 50%;
+  left: 42%;
+  transform: translate(-42%, -50%);
+  width: max(100vw, calc(100dvh * 1.791));
+  height: max(100dvh, calc(100vw / 1.791));
   animation: bethak-breathe 34s ease-in-out infinite;
   transform-origin: 60% 55%;
+  @media (min-width: 768px) {
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }
+
+@utility ambience {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 
 @keyframes bethak-breathe {
   0%,
