@@ -77,7 +77,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "बैठक BETHAK — Late-Night Ghazal Radio Room" },
+      { title: "बैठक — ग़ज़लें • चाय • थोड़ी देर बैठो" },
+      { name: "theme-color", content: "#2B1710" },
+
       { name: "description", content: "A quiet digital baithak. Chai, a harmonium and old Hindi ghazals in a warm, moonlit Indian sitting room." },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "BETHAK" },
