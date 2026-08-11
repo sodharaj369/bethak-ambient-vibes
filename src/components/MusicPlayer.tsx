@@ -117,7 +117,7 @@ export function MusicPlayer() {
         <div id={YT_HOST_ID} />
       </div>
       <div className="player" role="group" aria-label="Bethak music player">
-        <div className="artwork">
+        <div className="artwork" key={state.track.id}>
           <Artwork
             key={state.track.id}
             candidates={state.track.artworkCandidates}
