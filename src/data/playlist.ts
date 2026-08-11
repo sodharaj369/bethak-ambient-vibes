@@ -1,3 +1,5 @@
+import rawPlaylist, { type PlaylistEntry } from "@/data/bethakPlaylist";
+
 export type MusicTrack = {
   id: string;
   title: string;
@@ -13,32 +15,70 @@ export type MusicTrack = {
 /** Backwards-compatible alias. */
 export type Track = MusicTrack;
 
-/**
- * Add tracks here — one line each. id, url and artwork are derived.
- * Scales to 20–30 tracks without touching any other file.
- */
-type Seed = { title: string; artist: string; youtubeId: string };
-
-const seeds: Seed[] = [
-  { title: "Hothon Se Chhu Lo Tum", artist: "Jagjit Singh", youtubeId: "X0gB9jcgXxg" },
-  { title: "Tum Ko Dekha To Yeh Khayal Aaya", artist: "Jagjit Singh", youtubeId: "WtPbNKk9XpU" },
-  { title: "Jhuki Jhuki Si Nazar", artist: "Jagjit Singh", youtubeId: "xY2P6IAd0MI" },
-];
-
 export const thumbnailCandidates = (youtubeId: string) => [
   `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
   `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`,
   `https://img.youtube.com/vi/${youtubeId}/default.jpg`,
 ];
 
-export const bethakPlaylist: MusicTrack[] = seeds.map((s, i) => ({
-  id: `track-${i + 1}`,
-  title: s.title,
-  artist: s.artist,
-  youtubeId: s.youtubeId,
-  youtubeUrl: `https://www.youtube.com/watch?v=${s.youtubeId}`,
-  artworkCandidates: thumbnailCandidates(s.youtubeId),
-}));
+const isNonEmpty = (v: unknown): v is string => typeof v === "string" && v.trim().length > 0;
+
+/**
+ * Validates and normalises the editable playlist file.
+ * Invalid tracks are skipped with a developer warning instead of crashing.
+ */
+function buildPlaylist(entries: PlaylistEntry[]): MusicTrack[] {
+  const seen = new Set<string>();
+  const tracks: MusicTrack[] = [];
+
+  entries.forEach((entry, i) => {
+    const where = `bethakPlaylist[${i}]`;
+
+    if (!entry || typeof entry !== "object") {
+      console.warn(`[BETHAK] ${where} is not a track object — skipped.`);
+      return;
+    }
+
+    const missing = (["title", "artist", "youtubeId"] as const).filter(
+      (k) => !isNonEmpty(entry[k]),
+    );
+    if (missing.length > 0) {
+      console.warn(
+        `[BETHAK] ${where} ("${entry.title ?? "untitled"}") is missing: ${missing.join(", ")} — skipped.`,
+      );
+      return;
+    }
+
+    let id = isNonEmpty(entry.id) ? entry.id.trim() : `track-${i + 1}`;
+    if (!isNonEmpty(entry.id)) {
+      console.warn(`[BETHAK] ${where} has no id — using "${id}".`);
+    }
+    if (seen.has(id)) {
+      const unique = `${id}-${i + 1}`;
+      console.warn(`[BETHAK] ${where} has duplicate id "${id}" — using "${unique}" instead.`);
+      id = unique;
+    }
+    seen.add(id);
+
+    const youtubeId = entry.youtubeId.trim();
+    tracks.push({
+      id,
+      title: entry.title.trim(),
+      artist: entry.artist.trim(),
+      youtubeId,
+      youtubeUrl: `https://www.youtube.com/watch?v=${youtubeId}`,
+      artworkCandidates: thumbnailCandidates(youtubeId),
+    });
+  });
+
+  if (tracks.length === 0) {
+    console.warn("[BETHAK] No valid tracks found in src/data/bethakPlaylist.ts.");
+  }
+
+  return tracks;
+}
+
+export const bethakPlaylist: MusicTrack[] = buildPlaylist(rawPlaylist);
 
 export const EXTERNAL_LINKS = {
   spotify: "https://open.spotify.com/",
