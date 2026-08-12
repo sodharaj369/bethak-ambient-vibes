@@ -11,10 +11,10 @@ function phaseForHour(h: number): Phase {
   return "night";
 }
 
-/** Visual slow-down: the room should drift, ~35% slower than real time. */
-const BASE_RATE = 0.65;
+/** Visual slow-down: the room should drift, a touch slower than real time. */
+const BASE_RATE = 0.87;
 /** Barely-there per-cycle variation so repeats never feel mechanical. */
-const rateJitter = () => BASE_RATE * (0.95 + Math.random() * 0.05);
+const rateJitter = () => BASE_RATE * (0.97 + Math.random() * 0.03);
 /** Overlap (seconds of source time) used to crossfade one cycle into the next. */
 const OVERLAP = 1.6;
 const FADE_MS = 1600;
@@ -62,6 +62,13 @@ function SceneLayer({ moodId, active }: { moodId: MoodId; active: boolean }) {
       return;
     }
 
+    // A newly selected mood always begins its cycle from the top.
+    try {
+      a.currentTime = 0;
+    } catch {
+      /* not seekable yet */
+    }
+    setFront(0);
     play(a);
     if (!b) return;
 
@@ -129,6 +136,9 @@ export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
   const [phase, setPhase] = useState<Phase>("night");
   // Only the default scene is loaded initially; others mount on first use.
   const [mounted, setMounted] = useState<MoodId[]>([DEFAULT_MOOD]);
+  // The scene actually on screen. It lags `mood` while the veil covers the swap.
+  const [shown, setShown] = useState<MoodId>(mood);
+  const [veiled, setVeiled] = useState(false);
 
   useEffect(() => {
     const tick = () => setPhase(phaseForHour(new Date().getHours()));
@@ -141,22 +151,36 @@ export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
     setMounted((m) => (m.includes(mood) ? m : [...m, mood]));
   }, [mood]);
 
+  // Mood change: darken the room, swap the scene behind the darkness, lift it.
+  useEffect(() => {
+    if (mood === shown) return;
+    const reduced = prefersReducedMotion();
+    const coverMs = reduced ? 120 : 300;
+    setVeiled(true);
+    const swap = window.setTimeout(() => {
+      setShown(mood);
+      const lift = window.setTimeout(() => setVeiled(false), reduced ? 60 : 140);
+      timers.push(lift);
+    }, coverMs);
+    const timers: number[] = [swap];
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [mood, shown]);
+
   return (
     <div className="absolute inset-0 -z-10 overflow-hidden">
       <div className="room-frame">
         <div className="room-breathe">
           {mounted.map((id) => (
-            <SceneLayer key={id} moodId={id} active={id === mood} />
+            <SceneLayer key={id} moodId={id} active={id === shown} />
           ))}
         </div>
       </div>
       <div className="absolute inset-0 bg-[oklch(0.15_0.03_60_/_0.08)]" />
       <div className="hour-wash" data-phase={phase} />
       <div className="room-vignette" aria-hidden="true" />
+      <div className={`mood-veil ${veiled ? "mood-veil-in" : ""}`} aria-hidden="true" />
       <div className="center-scrim" aria-hidden="true" />
       <div className="lamp-glow" aria-hidden="true" />
     </div>
-
-
   );
 }
