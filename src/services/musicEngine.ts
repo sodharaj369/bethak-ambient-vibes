@@ -156,6 +156,38 @@ export class YouTubeEngine implements MusicEngine {
     return (this.tracks[this.index] ?? EMPTY_TRACK) as MusicTrack;
   }
 
+  /** Applies a restored position once the player can actually seek. */
+  private applyPendingSeek() {
+    if (this.pendingSeek == null || !this.player) return;
+    const d = this.player.getDuration();
+    if (!Number.isFinite(d) || d <= 0) return;
+    const target = Math.max(0, Math.min(this.pendingSeek, d - 2));
+    this.pendingSeek = null;
+    this.settling = false;
+    try {
+      this.player.seekTo(target, true);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /**
+   * Silently restores a previous sitting: cue the same song at roughly the same
+   * place, paused. No autoplay, no prompt.
+   */
+  restoreSession(index: number, position: number) {
+    if (index < 0 || index >= this.tracks.length) return;
+    if (this.playing || this.wantPlay) return;
+    this.index = index;
+    this.ensureOrder();
+    this.cursor = Math.max(0, this.order.indexOf(index));
+    this.pendingSeek = position > 5 ? position : null;
+    this.load(false);
+    if (this.ready) this.applyPendingSeek();
+  }
+
+
+
   /** Clears the post-load guard as soon as the player reports the new video. */
   private checkSettled() {
     if (!this.settling || !this.player) return;
