@@ -396,6 +396,29 @@ export class YouTubeEngine implements MusicEngine {
     this.emit();
   }
 
+  /**
+   * Swap the sitting's song list (mood change). The current song keeps playing
+   * if it belongs to the new session; otherwise the new session starts from its
+   * first song, matching whatever the player was doing.
+   */
+  setTracks(tracks: MusicTrack[]) {
+    if (tracks.length === 0) return;
+    const currentId = this.getCurrentTrack().id;
+    const sameList =
+      tracks.length === this.tracks.length &&
+      tracks.every((t, i) => t.id === this.tracks[i]?.id);
+    if (sameList) return;
+    const wasPlaying = this.playing || this.wantPlay;
+    this.tracks = tracks;
+    const keep = tracks.findIndex((t) => t.id === currentId);
+    this.index = keep >= 0 ? keep : 0;
+    this.buildOrder(this.index);
+    // Only reload when the song itself has to change — never interrupt a
+    // ghazal that also lives in the newly chosen bethak.
+    if (keep < 0) this.load(wasPlaying);
+    else this.emit();
+  }
+
   dispose() {
     this.disposed = true;
     if (this.ticker) clearInterval(this.ticker);

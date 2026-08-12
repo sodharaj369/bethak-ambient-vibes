@@ -1133,3 +1133,64 @@
     radial-gradient(120% 80% at 50% 45%, oklch(0.22 0.04 60 / 0.9), oklch(0.12 0.03 55) 70%),
     oklch(0.11 0.025 55);
 }
+
+/* --- V3: ambience + share, two small objects in the room ----------------- */
+@utility room-controls {
+  position: absolute;
+  left: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  pointer-events: auto;
+  @media (min-width: 768px) {
+    padding: 12px 22px;
+    gap: 16px;
+  }
+}
+
+@utility room-word {
+  background: none;
+  border: 0;
+  padding: 2px 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  color: oklch(0.95 0.02 82 / 0.34);
+  text-shadow: 0 1px 10px oklch(0.14 0.02 60 / 0.8);
+  transition: color 400ms ease;
+  cursor: pointer;
+  &:hover,
+  &:focus-visible {
+    color: oklch(0.97 0.03 82 / 0.72);
+    outline: none;
+  }
+}
+
+@utility room-word-on {
+  color: oklch(0.97 0.035 82 / 0.6);
+}
+
+@utility amb-slider {
+  appearance: none;
+  width: 54px;
+  height: 2px;
+  border-radius: 2px;
+  background: oklch(0.95 0.02 82 / 0.22);
+  cursor: pointer;
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: oklch(0.95 0.03 82 / 0.55);
+  }
+  &::-moz-range-thumb {
+    border: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: oklch(0.95 0.03 82 / 0.55);
+  }
+}

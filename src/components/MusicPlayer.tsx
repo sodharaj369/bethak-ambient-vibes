@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getYouTubeEngine, type PlayerState } from "@/services/musicEngine";
-import { bethakPlaylist } from "@/data/playlist";
+import { bethakPlaylist, type MusicTrack } from "@/data/playlist";
+import type { MoodId } from "@/data/scenes";
+import { getAmbienceEngine } from "@/services/ambienceEngine";
 import { PlaylistPanel } from "@/components/PlaylistPanel";
 import { isFresh, readSession, writeSession } from "@/lib/bethakSession";
 
@@ -87,8 +89,19 @@ function Artwork({
   );
 }
 
-export function MusicPlayer({ autoStart = false }: { autoStart?: boolean }) {
-  const engine = useMemo(() => getYouTubeEngine(YT_HOST_ID, bethakPlaylist), []);
+export function MusicPlayer({
+  autoStart = false,
+  mood,
+  tracks,
+}: {
+  autoStart?: boolean;
+  /** The bethak currently in the room — drives the ambience layer. */
+  mood: MoodId;
+  /** Curated songs of the current sitting. */
+  tracks: MusicTrack[];
+}) {
+  const engine = useMemo(() => getYouTubeEngine(YT_HOST_ID, tracks.length ? tracks : bethakPlaylist), []);
+  const ambience = useMemo(() => getAmbienceEngine(), []);
   const [state, setState] = useState<PlayerState>(() => engine.getState());
   const [open, setOpen] = useState(false);
   const barRef = useRef<HTMLDivElement>(null);
@@ -98,10 +111,30 @@ export function MusicPlayer({ autoStart = false }: { autoStart?: boolean }) {
   useEffect(() => {
     const session = readSession();
     if (!isFresh(session) || !session?.trackId) return;
-    const index = bethakPlaylist.findIndex((t) => t.id === session.trackId);
+    const index = tracks.findIndex((t) => t.id === session.trackId);
     if (index < 0) return;
     engine.restoreSession(index, session.position ?? 0);
+    // Only on first mount: later mood changes must not rewind the ghazal.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [engine]);
+
+  // Mood change swaps the curated session underneath, without restarting a
+  // song that also belongs to the new sitting.
+  useEffect(() => {
+    if (tracks.length) engine.setTracks(tracks);
+  }, [engine, tracks]);
+
+  // The room's own sound follows the mood, always crossfaded.
+  useEffect(() => {
+    ambience.setMood(mood);
+  }, [ambience, mood]);
+
+  // Leaving the room: stop the ambience cleanly.
+  useEffect(() => {
+    const stop = () => ambience.stop();
+    window.addEventListener("pagehide", stop);
+    return () => window.removeEventListener("pagehide", stop);
+  }, [ambience]);
 
   // Remember where we are, without ever interrupting playback.
   useEffect(() => {
@@ -122,8 +155,11 @@ export function MusicPlayer({ autoStart = false }: { autoStart?: boolean }) {
     if (!autoStart) return;
     // Music arrives a beat after the room starts opening, rising from silence.
     const id = window.setTimeout(() => void engine.fadeIn(700), 400);
+    // Same gesture initialises the ambient room sound.
+    ambience.start(mood);
     return () => window.clearTimeout(id);
-  }, [autoStart, engine]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, engine, ambience]);
 
   useEffect(() => {
     const unsub = engine.subscribe(setState);
@@ -242,7 +278,7 @@ export function MusicPlayer({ autoStart = false }: { autoStart?: boolean }) {
 
       {open && (
         <PlaylistPanel
-          tracks={bethakPlaylist}
+          tracks={tracks}
           currentIndex={state.index}
           shuffle={state.shuffle}
           repeatMode={state.repeatMode}
