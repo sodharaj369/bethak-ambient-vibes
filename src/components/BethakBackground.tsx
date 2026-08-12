@@ -53,6 +53,10 @@ function SceneLayer({
   const aRef = useRef<HTMLVideoElement>(null);
   const bRef = useRef<HTMLVideoElement>(null);
   const [front, setFront] = useState<0 | 1>(0);
+  /** The still first frame stays on top until real video pixels arrive. */
+  const [painted, setPainted] = useState(false);
+  /** The second loop layer only mounts once the first one is actually running. */
+  const [twin, setTwin] = useState(false);
   const reduced = prefersReducedMotion();
 
   useEffect(() => {
@@ -79,7 +83,10 @@ function SceneLayer({
     }
     setFront(0);
     play(a);
-    if (!b) return;
+    const twinTimer = window.setTimeout(() => setTwin(true), 1200);
+    if (!b) {
+      return () => window.clearTimeout(twinTimer);
+    }
 
     let current: 0 | 1 = 0;
     let swapping = false;
@@ -130,9 +137,10 @@ function SceneLayer({
     const id = window.setInterval(tick, 120);
     return () => {
       window.clearInterval(id);
+      window.clearTimeout(twinTimer);
       timers.forEach((t) => window.clearTimeout(t));
     };
-  }, [active, reduced]);
+  }, [active, reduced, twin]);
 
   const common = {
     className: "scene-video",
@@ -148,6 +156,9 @@ function SceneLayer({
     preload: moodId === DEFAULT_MOOD ? ("auto" as const) : ("metadata" as const),
   };
 
+  // Real pixels on screen: only now may the poster layer step aside.
+  const markPainted = () => setPainted(true);
+
   const fade = (visible: boolean) => ({
     opacity: visible ? 1 : 0,
     transition: `opacity ${LOOP.CROSSFADE_MS}ms ${visible ? LOOP.EASE_IN : LOOP.EASE_OUT}`,
@@ -155,10 +166,25 @@ function SceneLayer({
 
   return (
     <>
-      <video {...common} ref={aRef} style={fade(visible && (!active || front === 0))} />
-      {active && !reduced && (
+      <video
+        {...common}
+        ref={aRef}
+        onPlaying={markPainted}
+        onLoadedData={markPainted}
+        style={fade(visible && (!active || front === 0))}
+      />
+      {active && !reduced && twin && (
         <video {...common} ref={bRef} preload="auto" style={fade(front === 1)} />
       )}
+      {/* Poster layer: always mounted, above the video, never a blank frame. */}
+      <div
+        className="scene-poster"
+        aria-hidden="true"
+        style={{
+          backgroundImage: `url(${posterUrl(scene)})`,
+          opacity: visible && painted && active ? 0 : visible ? 1 : 0,
+        }}
+      />
     </>
   );
 }

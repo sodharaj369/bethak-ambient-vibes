@@ -867,6 +867,20 @@
 }
 
 /* --- Ambient video scenes ------------------------------------------------ */
+/* Still first frame of the scene, layered over the video so the room is
+   visible instantly and any buffering stays invisible. */
+@utility scene-poster {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+  transition: opacity 900ms ease;
+  @media (prefers-reduced-motion: reduce) {
+    transition: opacity 120ms linear;
+  }
+}
+
 @utility scene-video {
   position: absolute;
   inset: 0;
