@@ -50,6 +50,9 @@ export function ChaiSpot({ mood, enabled }: { mood: MoodId; enabled: boolean }) 
     } catch {
       /* storage blocked — the halo simply ends with this tap */
     }
+    // The harmonium listens for this: the second secret opens immediately,
+    // with no refresh and no re-entry.
+    window.dispatchEvent(new CustomEvent("bethak:chai-found"));
 
     // The first sip always answers. After that the room mostly stays quiet.
     const speak = !sipped || Math.random() < 0.4;
