@@ -120,9 +120,6 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
             {enabled && chaiFound && !found && (
               <span className="chai-hint harmonium-hint" aria-hidden="true" />
             )}
-            {import.meta.env.DEV && (
-              <span className="hotspot-debug" data-label="HARMONIUM HOTSPOT" aria-hidden="true" />
-            )}
           </button>
           {line && (
             <span
@@ -134,15 +131,7 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
           )}
         </div>
       </div>
-      {import.meta.env.DEV && (
-        <div className="debug-panel">
-          <div>chai discovered: {chaiFound ? "YES" : "NO"}</div>
-          <div>harmonium discovered: {found ? "YES" : "NO"}</div>
-          <div>harmonium hotspot: {enabled ? "ACTIVE" : "INACTIVE"}</div>
-          <div>harmonium hint: {enabled && chaiFound && !found ? "ON" : "OFF"}</div>
-
-        </div>
-      )}
     </div>
   );
 }
+
