@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { DEFAULT_MOOD, SCENES, posterUrl, videoUrl, type MoodId } from "@/data/scenes";
+import { DEFAULT_MOOD, SCENES, posterUrl, sceneById, videoUrl, type MoodId } from "@/data/scenes";
 
 type Phase = "evening" | "night" | "late" | "deep";
 
@@ -211,9 +211,18 @@ export function BethakBackground({
     return () => window.clearTimeout(id);
   }, [veiled, mood, shown]);
 
+  const m = sceneById(shown).mobile;
+  const frameVars = m
+    ? ({
+        "--m-x": m.x,
+        "--m-y": m.y,
+        "--m-zoom": String(m.zoom),
+      } as React.CSSProperties)
+    : undefined;
+
   return (
-    <div className="absolute inset-0 -z-10 overflow-hidden">
-      <div className="room-frame">
+    <div className="absolute inset-0 -z-10 overflow-hidden room-stage">
+      <div className="room-frame" style={frameVars}>
         <div className="room-breathe">
           {mounted.map((id) => (
             <SceneLayer
