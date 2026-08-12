@@ -3,8 +3,8 @@ import { sceneById, type MoodId } from "@/data/scenes";
 import { CHAI_FIRST_LINE, nextChaiLine } from "@/data/chaiLines";
 import { playChaiSound } from "@/services/chaiSound";
 
-/** How long a line stays before it fades away again. */
-const LINE_MS = 2600;
+/** How long a whisper holds before it fades away again. */
+const LINE_MS = 1800;
 
 /**
  * Chai Ki Chuski — the one small secret in the room.
@@ -30,8 +30,8 @@ export function ChaiSpot({ mood, enabled }: { mood: MoodId; enabled: boolean }) 
     playChaiSound();
     setNudge((n) => n + 1);
 
-    // The first sip always answers. After that it stays a little shy.
-    const speak = !sipped || Math.random() < 0.75;
+    // The first sip always answers. After that the room mostly stays quiet.
+    const speak = !sipped || Math.random() < 0.4;
     if (!sipped) setSipped(true);
     if (!speak) return;
 
@@ -42,7 +42,7 @@ export function ChaiSpot({ mood, enabled }: { mood: MoodId; enabled: boolean }) 
     setLine(next);
     setVisible(true);
     timers.current.push(window.setTimeout(() => setVisible(false), LINE_MS));
-    timers.current.push(window.setTimeout(() => setLine(null), LINE_MS + 900));
+    timers.current.push(window.setTimeout(() => setLine(null), LINE_MS + 700));
   }, [sipped]);
 
   if (!chai) return null;
