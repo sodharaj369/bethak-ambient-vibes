@@ -21,15 +21,55 @@ export type Scene = {
    * x/y = focal point inside the 16:9 frame, zoom = width in viewport widths.
    */
   mobile?: { x: string; y: string };
+  /**
+   * The chai cups inside the 16:9 frame (percentages of the frame, so the
+   * hotspot follows the illustration at every viewport size). `w`/`h` are the
+   * invisible hit area; the mobile pair is a larger, thumb-friendly version.
+   */
+  chai?: {
+    x: string;
+    y: string;
+    w: string;
+    h: string;
+    mobile?: { x?: string; y?: string; w: string; h: string };
+  };
 };
 
 export const SCENES: Scene[] = [
   // Window + moon are around x 0.62 in every scene; the sofa/chai sit left of
   // it, so the portrait focal point sits between them and leans window-ward.
-  { id: "raat", label: "रात", name: "Raat Ki Bethak", file: "Default_theme", mobile: { x: "67%", y: "45%" } },
-  { id: "baarish", label: "बारिश", name: "Baarish Ki Bethak", file: "rainly_scene", mobile: { x: "60%", y: "44%" } },
-  { id: "shaam", label: "शाम", name: "Shaam Ki Bethak", file: "sunset_scene", mobile: { x: "67%", y: "45%" } },
-  { id: "yaadein", label: "यादें", name: "Yaadon Ki Bethak", file: "ideal_1", mobile: { x: "65%", y: "46%" } },
+  {
+    id: "raat",
+    label: "रात",
+    name: "Raat Ki Bethak",
+    file: "Default_theme",
+    mobile: { x: "67%", y: "45%" },
+    chai: { x: "53.5%", y: "76%", w: "11%", h: "13%", mobile: { w: "17%", h: "18%" } },
+  },
+  {
+    id: "baarish",
+    label: "बारिश",
+    name: "Baarish Ki Bethak",
+    file: "rainly_scene",
+    mobile: { x: "60%", y: "44%" },
+    chai: { x: "53%", y: "76.5%", w: "11%", h: "13%", mobile: { w: "17%", h: "18%" } },
+  },
+  {
+    id: "shaam",
+    label: "शाम",
+    name: "Shaam Ki Bethak",
+    file: "sunset_scene",
+    mobile: { x: "67%", y: "45%" },
+    chai: { x: "53.5%", y: "77%", w: "11%", h: "13%", mobile: { w: "17%", h: "18%" } },
+  },
+  {
+    id: "yaadein",
+    label: "यादें",
+    name: "Yaadon Ki Bethak",
+    file: "ideal_1",
+    mobile: { x: "65%", y: "46%" },
+    chai: { x: "53%", y: "77%", w: "11%", h: "13%", mobile: { w: "17%", h: "18%" } },
+  },
 ];
 
 export const DEFAULT_MOOD: MoodId = "raat";
