@@ -240,9 +240,9 @@
 }
 
 @utility text-ui {
-  font-size: 0.66rem;
-  letter-spacing: 0.14em;
-  color: oklch(0.98 0.01 85 / 0.5);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: oklch(0.98 0.01 85 / 0.42);
 }
 
 @utility text-glow {
@@ -254,12 +254,13 @@
 }
 
 @utility link-quiet {
-  opacity: 0.62;
+  opacity: 0.4;
   transition: opacity 400ms ease;
   &:hover {
-    opacity: 0.95;
+    opacity: 0.8;
   }
 }
+
 
 @utility online-dot {
   display: inline-block;
