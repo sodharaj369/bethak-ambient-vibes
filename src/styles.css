@@ -168,19 +168,29 @@
 }
 
 /* Mirrors object-cover so percentage-positioned ambient overlays line up
-   with the illustration at every viewport size. */
+   with the illustration at every viewport size.
+
+   Portrait phones get their own camera: a full-cover crop would throw away
+   ~75% of the frame width (window, moon, rain), so instead the room is scaled
+   to a readable band and framed around a per-scene focal point
+   (--m-x / --m-y / --m-zoom, set from src/data/scenes.ts). No stretching —
+   the 16:9 ratio is preserved exactly, only the crop window changes. */
 @utility room-frame {
   position: absolute;
-  top: 50%;
-  left: 42%;
-  transform: translate(-42%, -50%);
-  width: max(100vw, calc(100dvh * 1.791));
-  height: max(100dvh, calc(100vw / 1.791));
-  @media (min-width: 768px) {
+  top: var(--m-y, 47%);
+  left: var(--m-x, 57%);
+  transform: translate(calc(-1 * var(--m-x, 57%)), calc(-1 * var(--m-y, 47%)));
+  width: min(calc(100vw * var(--m-zoom, 2.05)), max(100vw, calc(100dvh * 1.791)));
+  height: calc(min(calc(100vw * var(--m-zoom, 2.05)), max(100vw, calc(100dvh * 1.791))) / 1.791);
+  @media (min-width: 768px), (orientation: landscape) {
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    width: max(100vw, calc(100dvh * 1.791));
+    height: max(100dvh, calc(100vw / 1.791));
   }
 }
+
 
 /* Camera is locked: no zoom, pan, or Ken Burns drift. The room only moves
    because of the ambient video itself. */
@@ -1086,4 +1096,12 @@
 @utility ui-reveal-on {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Warm darkness surrounding the room band on portrait phones, so the
+   letterboxed area reads as the unlit part of the bethak, not as empty UI. */
+@utility room-stage {
+  background:
+    radial-gradient(120% 80% at 50% 45%, oklch(0.22 0.04 60 / 0.9), oklch(0.12 0.03 55) 70%),
+    oklch(0.11 0.025 55);
 }
