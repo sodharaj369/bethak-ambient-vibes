@@ -50,8 +50,31 @@ export const Route = createFileRoute("/")({
 });
 
 
+const MOOD_KEY = "bethakMood";
+
 function Index() {
   const [mood, setMood] = useState<MoodId>(DEFAULT_MOOD);
+
+  // Restore the last chosen mood after hydration (keeps SSR markup stable).
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(MOOD_KEY);
+      if (saved && SCENES.some((s) => s.id === saved)) setMood(saved as MoodId);
+    } catch {
+      /* storage blocked — stay on the default */
+    }
+  }, []);
+
+  const chooseMood = (id: MoodId) => {
+    setMood(id);
+    try {
+      window.localStorage.setItem(MOOD_KEY, id);
+    } catch {
+      /* ignore */
+    }
+  };
+
+
 
   return (
     <main className="bethak-screen">
