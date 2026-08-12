@@ -115,11 +115,15 @@ function Index() {
 
       {!veilGone && (
         <div className={`enter-veil ${lifting ? "enter-veil-out" : ""}`}>
-          {!entered && (
-            <button type="button" className="enter-word font-devanagari" onClick={enterBethak}>
-              बैठक में आइए
-            </button>
-          )}
+          <button
+            type="button"
+            className={`enter-word font-devanagari${entered ? " enter-word-gone" : ""}`}
+            onClick={enterBethak}
+            aria-hidden={entered}
+            tabIndex={entered ? -1 : 0}
+          >
+            बैठक में आइए
+          </button>
         </div>
       )}
     </main>
