@@ -1245,3 +1245,107 @@
     background: oklch(0.95 0.03 82 / 0.45);
   }
 }
+
+/* --- V3.1: Chai Ki Chuski — one small secret in the room ----------------- */
+/* An invisible hotspot over the chai cups, positioned inside the same 16:9
+   room frame as the video so it follows the illustration at every size. */
+@utility chai-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@utility chai-spot {
+  position: absolute;
+  left: var(--chai-mx, 53%);
+  top: var(--chai-my, 76%);
+  width: var(--chai-mw, 16%);
+  height: var(--chai-mh, 18%);
+  transform: translate(-50%, -50%);
+  @media (min-width: 768px), (orientation: landscape) {
+    left: var(--chai-x, 53%);
+    top: var(--chai-y, 76%);
+    width: var(--chai-w, 11%);
+    height: var(--chai-h, 13%);
+  }
+}
+
+@utility chai-hit {
+  position: absolute;
+  inset: 0;
+  min-height: 44px;
+  min-width: 44px;
+  border: 0;
+  background: transparent;
+  border-radius: 9999px;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.chai-hit:focus-visible {
+  box-shadow: 0 0 0 1px oklch(0.95 0.05 80 / 0.28);
+}
+
+/* Barely-there warmth around the cup on tap — almost imperceptible. */
+@utility chai-warm {
+  position: absolute;
+  inset: -8%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, oklch(0.95 0.08 80 / 0.1), transparent 68%);
+  opacity: 0;
+  animation: chai-sip 900ms ease-out;
+  pointer-events: none;
+}
+
+@keyframes chai-sip {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* The thought itself: no card, no toast — just words in the room. */
+@utility chai-line {
+  position: absolute;
+  left: 50%;
+  bottom: 104%;
+  transform: translate(-50%, 6px);
+  width: max-content;
+  max-width: min(76vw, 26rem);
+  text-align: center;
+  font-size: clamp(0.95rem, 1.1vw + 0.7rem, 1.15rem);
+  line-height: 1.5;
+  color: oklch(0.95 0.02 85);
+  text-shadow: 0 1px 12px oklch(0.15 0.03 60 / 0.85);
+  opacity: 0;
+  transition:
+    opacity 900ms ease,
+    transform 900ms ease;
+  pointer-events: none;
+}
+
+.chai-line-on {
+  opacity: 0.82;
+  transform: translate(-50%, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chai-warm {
+    animation: none;
+  }
+  .chai-line {
+    transition-duration: 200ms;
+  }
+}
