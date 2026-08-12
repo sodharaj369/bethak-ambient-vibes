@@ -87,7 +87,7 @@ function Artwork({
   );
 }
 
-export function MusicPlayer() {
+export function MusicPlayer({ autoStart = false }: { autoStart?: boolean }) {
   const engine = useMemo(() => getYouTubeEngine(YT_HOST_ID, bethakPlaylist), []);
   const [state, setState] = useState<PlayerState>(() => engine.getState());
   const [open, setOpen] = useState(false);
@@ -116,6 +116,12 @@ export function MusicPlayer() {
       window.removeEventListener("pagehide", save);
     };
   }, [engine]);
+
+  // Entering the room is a real user gesture: start the music from it.
+  useEffect(() => {
+    if (!autoStart) return;
+    void engine.play();
+  }, [autoStart, engine]);
 
   useEffect(() => {
     const unsub = engine.subscribe(setState);

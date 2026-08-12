@@ -1016,3 +1016,56 @@
     transition-duration: 120ms;
   }
 }
+
+/* Entering the room: the scene sits on its first frame under a warm darkness
+   until the visitor steps in, then the darkness lifts slowly. */
+@utility enter-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+    ellipse at 50% 58%,
+    oklch(0.17 0.035 62 / 0.9) 0%,
+    oklch(0.11 0.03 55 / 0.965) 68%,
+    oklch(0.08 0.022 48 / 0.99) 100%
+  );
+  opacity: 1;
+  transition: opacity 1300ms cubic-bezier(0.33, 0, 0.2, 1);
+}
+
+@utility enter-veil-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@utility enter-word {
+  appearance: none;
+  background: oklch(0.28 0.045 62 / 0.28);
+  border: 1px solid oklch(0.72 0.05 70 / 0.22);
+  border-radius: 999px;
+  padding: 0.55rem 1.6rem;
+  color: oklch(0.93 0.03 82 / 0.86);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  backdrop-filter: blur(3px);
+  cursor: pointer;
+  transition: color 400ms ease, background 400ms ease, border-color 400ms ease;
+}
+
+@utility enter-word-hover {
+  color: oklch(0.97 0.03 84 / 0.96);
+}
+
+.enter-word:hover {
+  color: oklch(0.97 0.03 84 / 0.96);
+  background: oklch(0.32 0.05 64 / 0.36);
+  border-color: oklch(0.78 0.06 72 / 0.34);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter-veil {
+    transition-duration: 200ms;
+  }
+}

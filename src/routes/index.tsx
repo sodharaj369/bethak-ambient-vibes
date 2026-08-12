@@ -55,6 +55,8 @@ const MOOD_KEY = "bethakMood";
 
 function Index() {
   const [mood, setMood] = useState<MoodId>(DEFAULT_MOOD);
+  const [entered, setEntered] = useState(false);
+  const [lifting, setLifting] = useState(false);
 
   // Restore the last chosen mood after hydration (keeps SSR markup stable).
   useEffect(() => {
@@ -76,11 +78,16 @@ function Index() {
     }
   };
 
-
+  // Step in: the room starts moving, then the warm darkness slowly lifts.
+  const enterBethak = () => {
+    if (entered) return;
+    setEntered(true);
+    setLifting(true);
+  };
 
   return (
     <main className="bethak-screen">
-      <BethakBackground mood={mood} />
+      <BethakBackground mood={mood} started={entered} />
       <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
 
       <div className="title-slot">
@@ -89,7 +96,34 @@ function Index() {
 
       <MoodSelector mood={mood} onChange={chooseMood} />
 
-      <MusicPlayer />
+      <MusicPlayer autoStart={entered} />
+
+      {!lifting && (
+        <div className="enter-veil">
+          <button type="button" className="enter-word font-devanagari" onClick={enterBethak}>
+            बैठक में आइए · Enter Bethak
+          </button>
+        </div>
+      )}
+      {lifting && <VeilLift />}
     </main>
   );
+}
+
+/** The warm darkness that stays for a beat, then fades away over ~1.3s. */
+function VeilLift() {
+  const [gone, setGone] = useState(false);
+  const [removed, setRemoved] = useState(false);
+
+  useEffect(() => {
+    const a = window.setTimeout(() => setGone(true), 60);
+    const b = window.setTimeout(() => setRemoved(true), 1800);
+    return () => {
+      window.clearTimeout(a);
+      window.clearTimeout(b);
+    };
+  }, []);
+
+  if (removed) return null;
+  return <div className={`enter-veil ${gone ? "enter-veil-out" : ""}`} aria-hidden="true" />;
 }

@@ -40,7 +40,15 @@ function prefersReducedMotion() {
  * No reverse playback, no black overlay, no camera transform — and the music
  * system is never touched.
  */
-function SceneLayer({ moodId, active }: { moodId: MoodId; active: boolean }) {
+function SceneLayer({
+  moodId,
+  active,
+  visible,
+}: {
+  moodId: MoodId;
+  active: boolean;
+  visible: boolean;
+}) {
   const scene = useMemo(() => SCENES.find((s) => s.id === moodId)!, [moodId]);
   const aRef = useRef<HTMLVideoElement>(null);
   const bRef = useRef<HTMLVideoElement>(null);
@@ -147,7 +155,7 @@ function SceneLayer({ moodId, active }: { moodId: MoodId; active: boolean }) {
 
   return (
     <>
-      <video {...common} ref={aRef} style={fade(active && front === 0)} />
+      <video {...common} ref={aRef} style={fade(visible && (!active || front === 0))} />
       {active && !reduced && (
         <video {...common} ref={bRef} preload="auto" style={fade(front === 1)} />
       )}
@@ -156,7 +164,14 @@ function SceneLayer({ moodId, active }: { moodId: MoodId; active: boolean }) {
 }
 
 
-export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
+export function BethakBackground({
+  mood = DEFAULT_MOOD,
+  started = true,
+}: {
+  mood?: MoodId;
+  /** The ambient video only runs once the visitor has entered the room. */
+  started?: boolean;
+}) {
 
   // Start on the approved look, then settle into the real hour after mount
   // (keeps SSR markup stable and the change imperceptible).
@@ -201,7 +216,12 @@ export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
       <div className="room-frame">
         <div className="room-breathe">
           {mounted.map((id) => (
-            <SceneLayer key={id} moodId={id} active={id === shown} />
+            <SceneLayer
+              key={id}
+              moodId={id}
+              active={started && id === shown}
+              visible={id === shown}
+            />
           ))}
         </div>
       </div>
