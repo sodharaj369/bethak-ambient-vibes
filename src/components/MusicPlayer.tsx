@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getYouTubeEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist } from "@/data/playlist";
 import { PlaylistPanel } from "@/components/PlaylistPanel";
+import { isFresh, readSession, writeSession } from "@/lib/bethakSession";
 
 function fmt(s: number) {
   if (!Number.isFinite(s) || s < 0) s = 0;
@@ -92,6 +93,29 @@ export function MusicPlayer() {
   const [open, setOpen] = useState(false);
   const barRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
+
+  // Silently pick the sitting back up: same song, roughly the same place.
+  useEffect(() => {
+    const session = readSession();
+    if (!isFresh(session) || !session?.trackId) return;
+    const index = bethakPlaylist.findIndex((t) => t.id === session.trackId);
+    if (index < 0) return;
+    engine.restoreSession(index, session.position ?? 0);
+  }, [engine]);
+
+  // Remember where we are, without ever interrupting playback.
+  useEffect(() => {
+    const save = () => {
+      const s = engine.getState();
+      writeSession({ trackId: s.track.id, index: s.index, position: s.position });
+    };
+    const id = window.setInterval(save, 7000);
+    window.addEventListener("pagehide", save);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("pagehide", save);
+    };
+  }, [engine]);
 
   useEffect(() => {
     const unsub = engine.subscribe(setState);

@@ -101,6 +101,8 @@ export class YouTubeEngine implements MusicEngine {
   /** Playback sequence of playlist indices; identity unless shuffling. */
   private order: number[] = [];
   private cursor = 0;
+  /** Position to apply as soon as the loaded/cued video is addressable. */
+  private pendingSeek: number | null = null;
 
 
   constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
@@ -130,8 +132,10 @@ export class YouTubeEngine implements MusicEngine {
             if (e.data === 1 || e.data === 5) this.settling = false;
             if (e.data === 1) this.errorStreak = 0;
             if (e.data === 1 || e.data === 2) this.playing = e.data === 1;
+            this.applyPendingSeek();
             this.emit();
           },
+
           onError: () => {
             // Unplayable video (embedding/region/deleted): never pretend it plays.
             this.playing = false;
@@ -144,13 +148,47 @@ export class YouTubeEngine implements MusicEngine {
     });
     // Reads live player time — no simulated progress.
     this.ticker = setInterval(() => {
-      if (this.ready) this.emit();
+      if (!this.ready) return;
+      this.applyPendingSeek();
+      this.emit();
     }, 250);
   }
 
   getCurrentTrack(): MusicTrack {
     return (this.tracks[this.index] ?? EMPTY_TRACK) as MusicTrack;
   }
+
+  /** Applies a restored position once the player can actually seek. */
+  private applyPendingSeek() {
+    if (this.pendingSeek == null || !this.player) return;
+    const d = this.player.getDuration();
+    if (!Number.isFinite(d) || d <= 0) return;
+    const target = Math.max(0, Math.min(this.pendingSeek, d - 2));
+    this.pendingSeek = null;
+    this.settling = false;
+    try {
+      this.player.seekTo(target, true);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /**
+   * Silently restores a previous sitting: cue the same song at roughly the same
+   * place, paused. No autoplay, no prompt.
+   */
+  restoreSession(index: number, position: number) {
+    if (index < 0 || index >= this.tracks.length) return;
+    if (this.playing || this.wantPlay) return;
+    this.index = index;
+    this.ensureOrder();
+    this.cursor = Math.max(0, this.order.indexOf(index));
+    this.load(false);
+    this.pendingSeek = position > 5 ? position : null;
+    if (this.ready) this.applyPendingSeek();
+  }
+
+
 
   /** Clears the post-load guard as soon as the player reports the new video. */
   private checkSettled() {
@@ -213,6 +251,7 @@ export class YouTubeEngine implements MusicEngine {
   }
 
   private load(autoplay: boolean) {
+    this.pendingSeek = null;
     const id = this.getCurrentTrack().youtubeId;
     this.wantPlay = autoplay;
     this.settling = true;
