@@ -120,7 +120,9 @@ export function MusicPlayer({ autoStart = false }: { autoStart?: boolean }) {
   // Entering the room is a real user gesture: start the music from it.
   useEffect(() => {
     if (!autoStart) return;
-    void engine.play();
+    // Music arrives a beat after the room starts opening, rising from silence.
+    const id = window.setTimeout(() => void engine.fadeIn(700), 400);
+    return () => window.clearTimeout(id);
   }, [autoStart, engine]);
 
   useEffect(() => {
