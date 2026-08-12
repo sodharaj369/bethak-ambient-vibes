@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  DEFAULT_MOOD,
-  SCENES,
-  posterUrl,
-  reverseVideoUrl,
-  videoUrl,
-  type MoodId,
-} from "@/data/scenes";
+import { DEFAULT_MOOD, SCENES, posterUrl, videoUrl, type MoodId } from "@/data/scenes";
 
 type Phase = "evening" | "night" | "late" | "deep";
 
@@ -18,10 +11,21 @@ function phaseForHour(h: number): Phase {
   return "night";
 }
 
-/** Visual slow-down: the room should drift, a touch slower than real time. */
-const BASE_RATE = 0.87;
-/** How close to the final frame we hand over to the other direction. */
-const HANDOFF = 0.12;
+/** Tunable loop behaviour (no UI — tweak here). */
+const LOOP = {
+  /** Visual slow-down: the room drifts a touch slower than real time. */
+  RATE: 0.87,
+  /** Seconds before the end at which the incoming layer starts, invisible. */
+  OVERLAP: 1.5,
+  /** Silent head start before the opacity handover begins (ms). */
+  PREROLL_MS: 220,
+  /** Length of the opacity handover (ms). */
+  CROSSFADE_MS: 1200,
+  /** Incoming layer curve: gentle ease-in-out. */
+  EASE_IN: "cubic-bezier(0.42, 0, 0.58, 1)",
+  /** Outgoing layer curve: stays dominant, then releases late. */
+  EASE_OUT: "cubic-bezier(0.85, 0, 0.9, 0.55)",
+};
 
 function prefersReducedMotion() {
   if (typeof window === "undefined" || !window.matchMedia) return false;
@@ -29,93 +33,102 @@ function prefersReducedMotion() {
 }
 
 /**
- * One ambient mood, played as an endless ping-pong: the forward file runs to
- * its last frame, then a pre-rendered reversed copy takes over from its first
- * frame (which is the same picture), then back again. Because the direction
- * change happens on a shared frame there is no jump, no fade and no visible
- * loop point. Purely visual — music playback is untouched.
+ * One ambient mood. The active scene runs two identical, pixel-aligned video
+ * layers: shortly before the current one ends the other starts from frame 0
+ * while still invisible, then a slow eased opacity handover makes it dominant.
+ * The old layer is paused and rewound invisibly underneath and the roles swap.
+ * No reverse playback, no black overlay, no camera transform — and the music
+ * system is never touched.
  */
 function SceneLayer({ moodId, active }: { moodId: MoodId; active: boolean }) {
   const scene = useMemo(() => SCENES.find((s) => s.id === moodId)!, [moodId]);
-  const fwdRef = useRef<HTMLVideoElement>(null);
-  const revRef = useRef<HTMLVideoElement>(null);
+  const aRef = useRef<HTMLVideoElement>(null);
+  const bRef = useRef<HTMLVideoElement>(null);
   const [front, setFront] = useState<0 | 1>(0);
   const reduced = prefersReducedMotion();
 
   useEffect(() => {
-    const fwd = fwdRef.current;
-    const rev = revRef.current;
-    if (!fwd) return;
+    const a = aRef.current;
+    const b = bRef.current;
+    if (!a) return;
 
     const play = (el: HTMLVideoElement) => {
-      el.playbackRate = BASE_RATE;
+      el.playbackRate = LOOP.RATE;
       const p = el.play();
       if (p && typeof p.catch === "function") p.catch(() => {});
     };
 
     if (!active || reduced) {
-      fwd.pause();
-      rev?.pause();
+      a.pause();
+      b?.pause();
       return;
     }
 
-    // A newly selected mood always begins its cycle from the top.
     try {
-      fwd.currentTime = 0;
+      a.currentTime = 0;
     } catch {
       /* not seekable yet */
     }
     setFront(0);
-    play(fwd);
-    if (!rev) return;
+    play(a);
+    if (!b) return;
 
     let current: 0 | 1 = 0;
     let swapping = false;
+    const timers: number[] = [];
 
-    const swap = () => {
-      const cur = current === 0 ? fwd : rev;
-      const next = current === 0 ? rev : fwd;
+    const beginHandover = () => {
+      const cur = current === 0 ? a : b;
+      const next = current === 0 ? b : a;
       swapping = true;
+
+      // Start the incoming layer invisibly and let it settle before fading.
       try {
         next.currentTime = 0;
       } catch {
         /* not seekable yet */
       }
       play(next);
-      current = current === 0 ? 1 : 0;
-      setFront(current);
-      cur.pause();
-      try {
-        cur.currentTime = 0;
-      } catch {
-        /* ignore */
-      }
-      swapping = false;
+
+      timers.push(
+        window.setTimeout(() => {
+          current = current === 0 ? 1 : 0;
+          setFront(current);
+
+          timers.push(
+            window.setTimeout(() => {
+              cur.pause();
+              try {
+                cur.currentTime = 0;
+              } catch {
+                /* ignore */
+              }
+              swapping = false;
+            }, LOOP.CROSSFADE_MS + 150),
+          );
+        }, LOOP.PREROLL_MS),
+      );
     };
 
     const tick = () => {
-      const cur = current === 0 ? fwd : rev;
-      const dur = cur.duration;
       if (swapping) return;
-      if (Number.isFinite(dur) && dur > 0 && cur.currentTime >= dur - HANDOFF) swap();
+      const cur = current === 0 ? a : b;
+      const dur = cur.duration;
+      if (Number.isFinite(dur) && dur > 0 && cur.currentTime >= dur - LOOP.OVERLAP) {
+        beginHandover();
+      }
     };
 
-    const onEnded = () => {
-      if (!swapping) swap();
-    };
-
-    fwd.addEventListener("ended", onEnded);
-    rev.addEventListener("ended", onEnded);
-    const id = window.setInterval(tick, 60);
+    const id = window.setInterval(tick, 120);
     return () => {
       window.clearInterval(id);
-      fwd.removeEventListener("ended", onEnded);
-      rev.removeEventListener("ended", onEnded);
+      timers.forEach((t) => window.clearTimeout(t));
     };
   }, [active, reduced]);
 
   const common = {
     className: "scene-video",
+    src: videoUrl(scene),
     poster: posterUrl(scene),
     muted: true,
     playsInline: true,
@@ -127,30 +140,24 @@ function SceneLayer({ moodId, active }: { moodId: MoodId; active: boolean }) {
     preload: moodId === DEFAULT_MOOD ? ("auto" as const) : ("metadata" as const),
   };
 
+  const fade = (visible: boolean) => ({
+    opacity: visible ? 1 : 0,
+    transition: `opacity ${LOOP.CROSSFADE_MS}ms ${visible ? LOOP.EASE_IN : LOOP.EASE_OUT}`,
+  });
+
   return (
     <>
-      <video
-        {...common}
-        ref={fwdRef}
-        src={videoUrl(scene)}
-        style={{ opacity: active && front === 0 ? 1 : 0, transition: "none" }}
-      />
+      <video {...common} ref={aRef} style={fade(active && front === 0)} />
       {active && !reduced && (
-        <video
-          {...common}
-          ref={revRef}
-          src={reverseVideoUrl(scene)}
-          preload="auto"
-          style={{ opacity: front === 1 ? 1 : 0, transition: "none" }}
-        />
+        <video {...common} ref={bRef} preload="auto" style={fade(front === 1)} />
       )}
     </>
   );
 }
 
 
-
 export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
+
   // Start on the approved look, then settle into the real hour after mount
   // (keeps SSR markup stable and the change imperceptible).
   const [phase, setPhase] = useState<Phase>("night");
