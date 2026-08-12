@@ -94,8 +94,7 @@ function PanLab() {
       onPointerMove={onMove}
       onPointerUp={onUp}
       onPointerCancel={onUp}
-      // Let the browser keep vertical gestures; we own the horizontal one.
-      css-touch-action="pan-y"
+      
     >
       <div ref={stage} className="absolute inset-0" style={{ touchAction: "pan-y" }}>
         <BethakBackground mood={mood} started />
