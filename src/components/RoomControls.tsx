@@ -44,6 +44,7 @@ export function RoomControls({ mood }: { mood: MoodId }) {
 
   return (
     <div className="room-controls">
+      <span className="room-side">
       <button
         type="button"
         className={`room-word${pref.enabled ? " room-word-on" : ""}`}
@@ -68,9 +69,10 @@ export function RoomControls({ mood }: { mood: MoodId }) {
           onChange={(e) => engine.setVolume(Number(e.target.value) / 100)}
         />
       )}
+      </span>
       <button
         type="button"
-        className="room-word"
+        className="room-word room-word-share"
         title="Share this bethak"
         onClick={() => void share()}
       >

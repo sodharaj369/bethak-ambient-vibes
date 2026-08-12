@@ -1146,17 +1146,31 @@
 @utility room-controls {
   position: absolute;
   left: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 6px);
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
   z-index: 20;
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 0 6px;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 0 14px;
   pointer-events: auto;
+  /* One quiet utility row: ambience on the left, share on the right. */
   @media (min-width: 768px) {
+    right: auto;
+    justify-content: flex-start;
+    gap: 2px;
     padding: 0 12px;
     bottom: 10px;
   }
+}
+
+/* Ambience + its volume travel together as the left half of the row. */
+@utility room-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
 /* Icon always there, word only on approach. No box, no border, no card. */
@@ -1185,6 +1199,12 @@
   &:focus-visible .room-word-label {
     opacity: 1;
     max-width: 8rem;
+  }
+}
+
+@utility room-word-share {
+  @media (max-width: 767px) {
+    margin-right: -8px;
   }
 }
 
@@ -1220,7 +1240,8 @@
 
 @utility amb-slider {
   appearance: none;
-  width: 44px;
+  width: 52px;
+  max-width: 22vw;
   height: 2px;
   border-radius: 2px;
   background: oklch(0.95 0.02 82 / 0.16);
