@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { BethakBackground } from "@/components/BethakBackground";
 import { BethakTitle } from "@/components/BethakTitle";
 import { TopBar } from "@/components/TopBar";
 import { MusicPlayer } from "@/components/MusicPlayer";
+import { MoodSelector } from "@/components/MoodSelector";
+import { DEFAULT_MOOD, type MoodId } from "@/data/scenes";
 import { EXTERNAL_LINKS } from "@/data/playlist";
 
 const SITE_URL = "https://bethak-ambient-vibes.lovable.app";
@@ -48,14 +51,18 @@ export const Route = createFileRoute("/")({
 
 
 function Index() {
+  const [mood, setMood] = useState<MoodId>(DEFAULT_MOOD);
+
   return (
     <main className="bethak-screen">
-      <BethakBackground />
+      <BethakBackground mood={mood} />
       <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
 
       <div className="title-slot">
         <BethakTitle />
       </div>
+
+      <MoodSelector mood={mood} onChange={setMood} />
 
       <MusicPlayer />
     </main>
