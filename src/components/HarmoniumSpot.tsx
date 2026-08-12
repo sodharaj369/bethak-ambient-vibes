@@ -29,16 +29,28 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
 
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
+  // Warm the note up once the hotspot is live so every tap sounds instantly.
+  useEffect(() => {
+    if (enabled) preloadHarmoniumNote();
+  }, [enabled]);
+
   // Watch (cheaply) for the chai discovery so the second hint can begin.
   useEffect(() => {
     const read = () => {
       try {
-        setFound(window.sessionStorage.getItem(FOUND_KEY) === "1");
-        setChaiFound(window.sessionStorage.getItem(CHAI_FOUND_KEY) === "1");
+        setFound((prev) => prev || window.sessionStorage.getItem(FOUND_KEY) === "1");
+        setChaiFound((prev) => prev || window.sessionStorage.getItem(CHAI_FOUND_KEY) === "1");
       } catch {
-        setFound(false);
+        /* storage blocked — keep whatever this visit already knows */
       }
     };
+    setFound(() => {
+      try {
+        return window.sessionStorage.getItem(FOUND_KEY) === "1";
+      } catch {
+        return false;
+      }
+    });
     read();
     // Instant: the chai tap announces itself. The poll is only a safety net.
     const onChai = () => setChaiFound(true);
@@ -50,16 +62,21 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
     };
   }, []);
 
+  /**
+   * One tap = one note, for the whole visit.
+   * `found` only governs the discovery glow and the single first-time line —
+   * it never gates the hotspot or this handler.
+   */
   const strike = useCallback(() => {
     playHarmoniumNote();
     const first = !found;
+    if (!first) return;
     setFound(true);
     try {
       window.sessionStorage.setItem(FOUND_KEY, "1");
     } catch {
       /* storage blocked — the hint simply ends with this tap */
     }
-    if (!first) return;
 
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
@@ -68,6 +85,7 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
     timers.current.push(window.setTimeout(() => setVisible(false), LINE_MS));
     timers.current.push(window.setTimeout(() => setLine(null), LINE_MS + 700));
   }, [found]);
+
 
   if (!spot) return null;
 
