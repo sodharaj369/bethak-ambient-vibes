@@ -9,3 +9,8 @@ Drop one looping ambient file per mood here (seamless loop, 30–90s, quiet):
 
 Optional `.ogg` versions of the same names are used as a fallback.
 Until a file exists the room simply stays silent — nothing breaks.
+
+Optional one-shot:
+
+- chai-cup.mp3 — ~0.5–1.2s quiet, realistic ceramic cup/spoon clink.
+  Used by the hidden chai interaction; if absent the tap stays silent.
