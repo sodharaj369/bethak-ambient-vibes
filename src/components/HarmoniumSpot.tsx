@@ -22,6 +22,7 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
   const spot = scene?.harmonium;
   const [line, setLine] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
+  const [strikeCount, setStrikeCount] = useState(0);
   const [found, setFound] = useState(true);
   /** Only hint once the chai has already been discovered in this visit. */
   const [chaiFound, setChaiFound] = useState(false);
@@ -69,6 +70,7 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
    */
   const strike = useCallback(() => {
     playHarmoniumNote();
+    setStrikeCount((count) => count + 1);
     const first = !found;
     if (!first) return;
     setFound(true);
@@ -114,6 +116,7 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
             tabIndex={enabled ? 0 : -1}
             onClick={strike}
           >
+            <span key={strikeCount} className="harmonium-strike" aria-hidden="true" />
             {enabled && chaiFound && !found && (
               <span className="chai-hint harmonium-hint" aria-hidden="true" />
             )}
