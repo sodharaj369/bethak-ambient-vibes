@@ -701,6 +701,15 @@
   .fan-sweep,
   .curtain-breeze,
   .steam,
+  .far-light,
+  .room-breathe,
+  .lamp-glow {
+    animation: none !important;
+  }
+
+  .fan-sweep,
+  .curtain-breeze,
+  .steam,
   .far-light {
     display: none;
   }
@@ -709,8 +718,10 @@
   *::before,
   *::after {
     animation: none !important;
+    transition-duration: 120ms !important;
   }
 }
+
 
 
 /* --- Playlist drawer: a small wooden drawer belonging to the room. --- */
