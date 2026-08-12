@@ -80,6 +80,7 @@ export const SCENES: Scene[] = [
     file: "ideal_1",
     mobile: { x: "65%", y: "46%" },
     chai: { x: "53%", y: "77%", w: "11%", h: "13%", mobile: { w: "17%", h: "18%" } },
+    harmonium: { x: "84%", y: "73%", w: "14%", h: "14%", mobile: { w: "18%", h: "17%" } },
   },
 ];
 
