@@ -81,11 +81,15 @@ function Index() {
   // Step in: the room starts moving, then the warm darkness slowly lifts,
   // and only once the room is fully there does the player settle in.
   const [showPlayer, setShowPlayer] = useState(false);
+  const [veilGone, setVeilGone] = useState(false);
   const enterBethak = () => {
     if (entered) return;
     setEntered(true);
-    setLifting(true);
-    window.setTimeout(() => setShowPlayer(true), 1500);
+    // The overlay element stays in place and only its opacity animates,
+    // starting a beat after the video has begun underneath.
+    window.setTimeout(() => setLifting(true), 400);
+    window.setTimeout(() => setShowPlayer(true), 2100);
+    window.setTimeout(() => setVeilGone(true), 2600);
   };
 
   return (
@@ -109,32 +113,15 @@ function Index() {
         </div>
       )}
 
-      {!lifting && (
-        <div className="enter-veil">
-          <button type="button" className="enter-word font-devanagari" onClick={enterBethak}>
-            बैठक में आइए
-          </button>
+      {!veilGone && (
+        <div className={`enter-veil ${lifting ? "enter-veil-out" : ""}`}>
+          {!entered && (
+            <button type="button" className="enter-word font-devanagari" onClick={enterBethak}>
+              बैठक में आइए
+            </button>
+          )}
         </div>
       )}
-      {lifting && <VeilLift />}
     </main>
   );
-}
-
-/** The warm darkness that stays for a beat, then fades away over ~1.3s. */
-function VeilLift() {
-  const [gone, setGone] = useState(false);
-  const [removed, setRemoved] = useState(false);
-
-  useEffect(() => {
-    const a = window.setTimeout(() => setGone(true), 60);
-    const b = window.setTimeout(() => setRemoved(true), 1800);
-    return () => {
-      window.clearTimeout(a);
-      window.clearTimeout(b);
-    };
-  }, []);
-
-  if (removed) return null;
-  return <div className={`enter-veil ${gone ? "enter-veil-out" : ""}`} aria-hidden="true" />;
 }
