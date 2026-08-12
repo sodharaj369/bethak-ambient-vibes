@@ -14,3 +14,6 @@ Optional one-shot:
 
 - chai-cup.mp3 — ~0.5–1.2s quiet, realistic ceramic cup/spoon clink.
   Used by the hidden chai interaction; if absent the tap stays silent.
+- harmonium-note.mp3 — ~0.5–1.5s single warm, soft acoustic harmonium note
+  (one sustained "sa", quiet). Used by the hidden harmonium tap; if absent
+  the tap stays silent.

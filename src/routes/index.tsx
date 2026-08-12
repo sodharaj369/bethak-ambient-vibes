@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { BethakBackground } from "@/components/BethakBackground";
 import { ChaiSpot } from "@/components/ChaiSpot";
+import { HarmoniumSpot } from "@/components/HarmoniumSpot";
 import { BethakTitle } from "@/components/BethakTitle";
 import { TopBar } from "@/components/TopBar";
 import { MusicPlayer } from "@/components/MusicPlayer";
@@ -110,6 +111,7 @@ function Index() {
       <BethakBackground mood={mood} started={entered} />
       {/* One small secret: the chai reacts. Nothing else changes. */}
       {entered && <ChaiSpot mood={mood} enabled={showPlayer} />}
+      {entered && <HarmoniumSpot mood={mood} enabled={showPlayer} />}
       <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} aria-hidden={!showPlayer}>
         <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
         <RoomControls mood={mood} />

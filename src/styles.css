@@ -1401,3 +1401,17 @@
     opacity: 0.5;
   }
 }
+
+/* The harmonium's own light: even quieter than the chai's, and it waits
+   longer before offering itself as the room's second small secret. */
+.harmonium-hint {
+  inset: -10%;
+  filter: blur(12px);
+  background: radial-gradient(
+    circle at 50% 58%,
+    oklch(0.92 0.08 72 / 0.12),
+    oklch(0.88 0.08 66 / 0.05) 44%,
+    transparent 72%
+  );
+  animation: chai-discover 9s ease-in-out 9s infinite;
+}
