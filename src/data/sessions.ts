@@ -33,7 +33,7 @@ export const BETHAK_SESSIONS: BethakSessionConfig[] = [
     title: "Raat Ki Bethak",
     description: "Late night, a slow fan, and ghazals that stay till morning.",
     ambience: "raat",
-    ambienceGain: 0.55,
+    ambienceGain: 1.0,
     songs: [
       "song-1", "song-2", "song-11", "song-12", "song-18", "song-19",
       "song-5", "song-20", "song-13", "song-6", "song-16",
@@ -45,7 +45,7 @@ export const BETHAK_SESSIONS: BethakSessionConfig[] = [
     title: "Baarish Ki Bethak",
     description: "Rain outside the window, chai inside, nothing to hurry for.",
     ambience: "baarish",
-    ambienceGain: 0.7,
+    ambienceGain: 1.0,
     songs: [
       "song-3", "song-4", "song-9", "song-14", "song-15", "song-21",
       "song-1", "song-12", "song-13", "song-6",
@@ -57,7 +57,7 @@ export const BETHAK_SESSIONS: BethakSessionConfig[] = [
     title: "Shaam Ki Bethak",
     description: "The last light of the day, birds settling, a soft mehfil.",
     ambience: "shaam",
-    ambienceGain: 0.5,
+    ambienceGain: 0.95,
     songs: [
       "song-20", "song-5", "song-17", "song-7", "song-16", "song-13",
       "song-2", "song-11", "song-6",
@@ -69,7 +69,7 @@ export const BETHAK_SESSIONS: BethakSessionConfig[] = [
     title: "Yaadon Ki Bethak",
     description: "Old letters, older songs, and a room full of remembering.",
     ambience: "yaadein",
-    ambienceGain: 0.4,
+    ambienceGain: 0.9,
     songs: [
       "song-10", "song-8", "song-22", "song-23", "song-24", "song-25",
       "song-26", "song-18", "song-19", "song-12",

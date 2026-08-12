@@ -17,7 +17,7 @@ const STEP_MS = 50;
 
 export type AmbiencePref = { enabled: boolean; volume: number };
 
-const DEFAULT_PREF: AmbiencePref = { enabled: true, volume: 0.35 };
+const DEFAULT_PREF: AmbiencePref = { enabled: true, volume: 0.7 };
 
 export function readAmbiencePref(): AmbiencePref {
   if (typeof window === "undefined") return DEFAULT_PREF;
