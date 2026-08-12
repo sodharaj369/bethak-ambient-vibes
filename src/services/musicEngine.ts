@@ -43,6 +43,8 @@ type YTPlayer = {
   getCurrentTime(): number;
   getDuration(): number;
   getPlayerState(): number;
+  setVolume(volume: number): void;
+  getVolume(): number;
   destroy(): void;
 };
 
@@ -152,6 +154,27 @@ export class YouTubeEngine implements MusicEngine {
       this.applyPendingSeek();
       this.emit();
     }, 250);
+  }
+
+  /** Enter the room: start playing with the volume rising gently from silence. */
+  async fadeIn(durationMs = 700, target = 100) {
+    const steps = 14;
+    try {
+      this.player?.setVolume(0);
+    } catch {
+      /* player not addressable yet */
+    }
+    await this.play();
+    for (let i = 1; i <= steps; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((r) => setTimeout(r, durationMs / steps));
+      const eased = Math.pow(i / steps, 1.6) * target;
+      try {
+        this.player?.setVolume(Math.round(eased));
+      } catch {
+        /* ignore */
+      }
+    }
   }
 
   getCurrentTrack(): MusicTrack {
