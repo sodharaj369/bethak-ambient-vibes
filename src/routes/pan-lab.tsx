@@ -34,15 +34,55 @@ export const Route = createFileRoute("/pan-lab")({
  * sideways inside its own overscan. This is a crop that moves — not 360°
  * video. Desktop keeps the production framing untouched.
  */
+const PROD_LEFT = -350; // candidate production limit (drag toward the left side of the room)
+const PROD_RIGHT = 150; // candidate production limit
+const RESIST_ZONE = 90; // px before a limit where movement starts easing off
+const SETTLE_MS = 420; // gentle inertial settling after release
+
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+/**
+ * Maps raw finger travel to frame travel: 1:1 through the middle, then a
+ * progressively softer ratio inside the last RESIST_ZONE px, hard stop at the
+ * limit. No rubber band — the frame never passes the clamp.
+ */
+function resist(target: number, min: number, max: number) {
+  if (target > max - RESIST_ZONE) {
+    const zone = Math.min(RESIST_ZONE, max - min);
+    if (zone <= 0) return max;
+    const over = Math.min(target - (max - zone), zone * 3);
+    const t = Math.min(1, over / (zone * 3));
+    return max - zone + zone * easeOutCubic(t);
+  }
+  if (target < min + RESIST_ZONE) {
+    const zone = Math.min(RESIST_ZONE, max - min);
+    if (zone <= 0) return min;
+    const over = Math.min(min + zone - target, zone * 3);
+    const t = Math.min(1, over / (zone * 3));
+    return min + zone - zone * easeOutCubic(t);
+  }
+  return target;
+}
+
 function PanLab() {
   const [mood, setMood] = useState<MoodId>(DEFAULT_MOOD);
   const [pan, setPan] = useState(0);
-  // Asymmetric: the default crop does not sit in the middle of the frame,
-  // so each direction gets exactly its own overscan and no more.
-  const [range, setRange] = useState({ min: 0, max: 0 });
+  // Available overscan, measured from the scene. The production candidate
+  // range is a tighter, asymmetric subset of this.
+  const [overscan, setOverscan] = useState({ min: 0, max: 0 });
   const [portrait, setPortrait] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ id: number; x: number; from: number } | null>(null);
+  const drag = useRef<{ id: number; x: number; from: number; last: number; t: number; v: number } | null>(null);
+  const raf = useRef<number | null>(null);
+
+  // Production candidate limits: never wider than the real overscan.
+  const range = useMemo(
+    () => ({
+      min: Math.max(overscan.min, PROD_LEFT),
+      max: Math.min(overscan.max, PROD_RIGHT),
+    }),
+    [overscan],
+  );
 
   // How far the frame may slide before an edge would enter the viewport.
   const measure = useCallback(() => {
@@ -56,8 +96,7 @@ function PanLab() {
     const right = r.right - pan;
     const max = Math.max(0, Math.round(-left)); // slide right, reveal left side
     const min = -Math.max(0, Math.round(right - window.innerWidth));
-    setRange({ min, max });
-    setPan((p) => Math.max(min, Math.min(max, p)));
+    setOverscan({ min, max });
   }, [pan]);
 
   useEffect(() => {
@@ -71,21 +110,55 @@ function PanLab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mood]);
 
+  useEffect(() => {
+    setPan((p) => Math.max(range.min, Math.min(range.max, p)));
+  }, [range]);
+
+  useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current); }, []);
+
   const span = range.max - range.min;
+
+  const stopSettle = () => {
+    if (raf.current) cancelAnimationFrame(raf.current);
+    raf.current = null;
+  };
+
+  // Short eased glide toward the projected resting point. Settles, never bounces.
+  const settle = (from: number, velocity: number) => {
+    const projected = from + velocity * 120; // px/ms * ms
+    const to = Math.max(range.min, Math.min(range.max, projected));
+    if (Math.abs(to - from) < 1) return;
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - t0) / SETTLE_MS);
+      setPan(from + (to - from) * easeOutCubic(t));
+      raf.current = t < 1 ? requestAnimationFrame(step) : null;
+    };
+    raf.current = requestAnimationFrame(step);
+  };
 
   const onDown = (e: React.PointerEvent) => {
     if (!portrait || span === 0) return;
-    drag.current = { id: e.pointerId, x: e.clientX, from: pan };
+    stopSettle();
+    drag.current = { id: e.pointerId, x: e.clientX, from: pan, last: e.clientX, t: performance.now(), v: 0 };
   };
   const onMove = (e: React.PointerEvent) => {
     const d = drag.current;
     if (!d || d.id !== e.pointerId) return;
+    const now = performance.now();
+    const dt = now - d.t;
+    if (dt > 0) d.v = (e.clientX - d.last) / dt;
+    d.last = e.clientX;
+    d.t = now;
     // Vertical movement is ignored entirely; only dx counts.
     const next = d.from + (e.clientX - d.x);
-    setPan(Math.max(range.min, Math.min(range.max, next)));
+    setPan(resist(next, range.min, range.max));
   };
   const onUp = (e: React.PointerEvent) => {
-    if (drag.current?.id === e.pointerId) drag.current = null;
+    const d = drag.current;
+    if (d?.id !== e.pointerId) return;
+    drag.current = null;
+    settle(pan, Math.max(-2, Math.min(2, d.v)));
   };
 
   const pct = pan >= 0 ? (range.max ? Math.round((pan / range.max) * 100) : 0) : range.min ? -Math.round((pan / range.min) * 100) : 0;
@@ -132,20 +205,21 @@ function PanLab() {
           }}
         >
           <div>
-            pan {pct}% ({pan}px · range {range.min}…{range.max}px) ·{" "}
+            pan {pct}% ({Math.round(pan)}px) · prod L {range.min}px / R {range.max}px ·{" "}
+            available {overscan.min}…{overscan.max}px ·{" "}
             {portrait ? "portrait: pan on" : "desktop/landscape: pan off"}
           </div>
           <input
             type="range"
             min={range.min || -1}
             max={range.max || 1}
-            value={pan}
+            value={Math.round(pan)}
 
-            onChange={(e) => setPan(Number(e.target.value))}
+            onChange={(e) => { stopSettle(); setPan(Number(e.target.value)); }}
             style={{ width: "100%" }}
             aria-label="Pan position"
           />
-          <button type="button" onClick={() => setPan(0)} style={{ textDecoration: "underline" }}>
+          <button type="button" onClick={() => { stopSettle(); setPan(0); }} style={{ textDecoration: "underline" }}>
             reset to default crop
           </button>
         </div>
