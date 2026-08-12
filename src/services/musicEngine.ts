@@ -182,6 +182,27 @@ export class YouTubeEngine implements MusicEngine {
     this.emit();
   }
 
+  /**
+   * The tab went to the background: pause hard and cancel any pending intent
+   * to play, so neither a ready event, a remount nor a returning pageshow can
+   * resume the ghazal on its own. The sitting (track + position) is kept.
+   */
+  suspend() {
+    this.wantPlay = false;
+    this.playing = false;
+    // Any fade-in still in flight would keep calling play(): the gate below
+    // makes those calls inert until the visitor asks again.
+    this.fadeToken += 1;
+    try {
+      this.player?.pauseVideo();
+    } catch {
+      /* player not addressable */
+    }
+    this.emit();
+  }
+
+
+
   /** Enter the room: start playing with the volume rising gently from silence. */
   async fadeIn(durationMs = 700, target = 100) {
     if (!this.entered) return;
