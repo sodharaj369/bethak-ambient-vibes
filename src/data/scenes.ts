@@ -19,10 +19,10 @@ export type Scene = {
 };
 
 export const SCENES: Scene[] = [
-  { id: "raat", label: "Raat", name: "Raat Ki Bethak", file: "Default_theme" },
-  { id: "baarish", label: "Baarish", name: "Baarish Ki Bethak", file: "rainly_scene" },
-  { id: "shaam", label: "Shaam", name: "Shaam Ki Bethak", file: "sunset_scene" },
-  { id: "yaadein", label: "Yaadein", name: "Yaadon Ki Bethak", file: "ideal_1" },
+  { id: "raat", label: "रात", name: "Raat Ki Bethak", file: "Default_theme" },
+  { id: "baarish", label: "बारिश", name: "Baarish Ki Bethak", file: "rainly_scene" },
+  { id: "shaam", label: "शाम", name: "Shaam Ki Bethak", file: "sunset_scene" },
+  { id: "yaadein", label: "यादें", name: "Yaadon Ki Bethak", file: "ideal_1" },
 ];
 
 export const DEFAULT_MOOD: MoodId = "raat";
