@@ -51,7 +51,10 @@ export function RoomControls({ mood }: { mood: MoodId }) {
         title={pref.enabled ? "Ambience on" : "Ambience off"}
         onClick={() => engine.setEnabled(!pref.enabled)}
       >
-        ♪ Ambience
+        <span className="room-word-mark" aria-hidden="true">
+          ♪
+        </span>
+        <span className={`room-word-label${pref.enabled ? " room-word-said" : ""}`}>Ambience</span>
       </button>
       {pref.enabled && (
         <input
@@ -65,8 +68,18 @@ export function RoomControls({ mood }: { mood: MoodId }) {
           onChange={(e) => engine.setVolume(Number(e.target.value) / 100)}
         />
       )}
-      <button type="button" className="room-word" onClick={() => void share()}>
-        {copied ? "Bethak copied." : "↗ Share"}
+      <button
+        type="button"
+        className="room-word"
+        title="Share this bethak"
+        onClick={() => void share()}
+      >
+        <span className="room-word-mark" aria-hidden="true">
+          ↗
+        </span>
+        <span className={`room-word-label${copied ? " room-word-said" : ""}`}>
+          {copied ? "Bethak copied" : "Share"}
+        </span>
       </button>
     </div>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_MOOD, SCENES, posterUrl, sceneById, videoUrl, type MoodId } from "@/data/scenes";
 
 type Phase = "evening" | "night" | "late" | "deep";
@@ -27,6 +27,9 @@ const LOOP = {
   EASE_OUT: "cubic-bezier(0.85, 0, 0.9, 0.55)",
 };
 
+/** Mood switch fade: short, hidden under the veil. */
+const SWITCH_MS = 260;
+
 function prefersReducedMotion() {
   if (typeof window === "undefined" || !window.matchMedia) return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -44,10 +47,13 @@ function SceneLayer({
   moodId,
   active,
   visible,
+  onReady,
 }: {
   moodId: MoodId;
   active: boolean;
   visible: boolean;
+  /** Fired once this scene has real pixels on screen (used to lift the veil). */
+  onReady?: (id: MoodId) => void;
 }) {
   const scene = useMemo(() => SCENES.find((s) => s.id === moodId)!, [moodId]);
   const aRef = useRef<HTMLVideoElement>(null);
@@ -157,21 +163,42 @@ function SceneLayer({
   };
 
   // Real pixels on screen: only now may the poster layer step aside.
-  const markPainted = () => setPainted(true);
+  const markPainted = () => {
+    setPainted(true);
+    onReady?.(moodId);
+  };
 
   const fade = (visible: boolean) => ({
     opacity: visible ? 1 : 0,
     transition: `opacity ${LOOP.CROSSFADE_MS}ms ${visible ? LOOP.EASE_IN : LOOP.EASE_OUT}`,
   });
 
+  // A scene that is on screen but not running (before entry, reduced motion)
+  // is already "ready" — its poster is the picture.
+  useEffect(() => {
+    if (visible && (!active || reduced)) onReady?.(moodId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, active, reduced, moodId]);
+
+  // The whole scene is one stacked unit: mood switching fades this wrapper,
+  // the loop handover happens between the two videos inside it. Keeping the
+  // two fades separate is what stops an old mood lingering under a new label.
   return (
-    <>
+    <div
+      className="scene-unit"
+      aria-hidden="true"
+      style={{
+        opacity: visible ? 1 : 0,
+        transition: `opacity ${SWITCH_MS}ms ease`,
+        pointerEvents: "none",
+      }}
+    >
       <video
         {...common}
         ref={aRef}
         onPlaying={markPainted}
         onLoadedData={markPainted}
-        style={fade(visible && (!active || front === 0))}
+        style={fade(!active || front === 0)}
       />
       {active && !reduced && twin && (
         <video {...common} ref={bRef} preload="auto" style={fade(front === 1)} />
@@ -179,13 +206,12 @@ function SceneLayer({
       {/* Poster layer: always mounted, above the video, never a blank frame. */}
       <div
         className="scene-poster"
-        aria-hidden="true"
         style={{
           backgroundImage: `url(${posterUrl(scene)})`,
-          opacity: visible && painted && active ? 0 : visible ? 1 : 0,
+          opacity: painted && active ? 0 : 1,
         }}
       />
-    </>
+    </div>
   );
 }
 
@@ -207,6 +233,9 @@ export function BethakBackground({
   // The scene actually on screen. It lags `mood` while the veil covers the swap.
   const [shown, setShown] = useState<MoodId>(mood);
   const [veiled, setVeiled] = useState(false);
+  /** The scene whose pixels are confirmed on screen. */
+  const [ready, setReady] = useState<MoodId | null>(null);
+  const handleReady = useCallback((id: MoodId) => setReady(id), []);
 
   useEffect(() => {
     const tick = () => setPhase(phaseForHour(new Date().getHours()));
@@ -225,17 +254,21 @@ export function BethakBackground({
     const reduced = prefersReducedMotion();
     const coverMs = reduced ? 120 : 300;
     setVeiled(true);
+    setReady(null);
     const swap = window.setTimeout(() => setShown(mood), coverMs);
     return () => window.clearTimeout(swap);
   }, [mood, shown]);
 
-  // New scene is mounted and running underneath: lift the darkness away.
+  // New scene has actually painted underneath: only then lift the darkness,
+  // so the label and the picture can never disagree. A safety timer keeps the
+  // room from staying dark if a file is slow.
   useEffect(() => {
     if (!veiled || mood !== shown) return;
     const reduced = prefersReducedMotion();
-    const id = window.setTimeout(() => setVeiled(false), reduced ? 60 : 160);
-    return () => window.clearTimeout(id);
-  }, [veiled, mood, shown]);
+    const lift = () => setVeiled(false);
+    const settle = window.setTimeout(lift, ready === shown ? (reduced ? 60 : SWITCH_MS) : 1400);
+    return () => window.clearTimeout(settle);
+  }, [veiled, mood, shown, ready]);
 
   const m = sceneById(shown)?.mobile;
   const frameVars = m
@@ -255,6 +288,7 @@ export function BethakBackground({
               moodId={id}
               active={started && id === shown}
               visible={id === shown}
+              onReady={handleReady}
             />
           ))}
         </div>
