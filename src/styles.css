@@ -1320,26 +1320,29 @@
 @utility chai-line {
   position: absolute;
   left: 50%;
-  bottom: 104%;
-  transform: translate(-50%, 6px);
+  /* Sits just above the rim of the cup, not out in the middle of the room. */
+  bottom: 72%;
+  transform: translate(-50%, 3px);
   width: max-content;
-  max-width: min(76vw, 26rem);
+  max-width: min(62vw, 18rem);
   text-align: center;
-  font-size: clamp(0.95rem, 1.1vw + 0.7rem, 1.15rem);
-  line-height: 1.5;
-  color: oklch(0.95 0.02 85);
-  text-shadow: 0 1px 12px oklch(0.15 0.03 60 / 0.85);
+  font-size: clamp(0.66rem, 0.5vw + 0.5rem, 0.78rem);
+  letter-spacing: 0.01em;
+  line-height: 1.45;
+  color: oklch(0.94 0.02 85);
+  text-shadow: 0 1px 8px oklch(0.15 0.03 60 / 0.7);
   opacity: 0;
   transition:
-    opacity 900ms ease,
-    transform 900ms ease;
+    opacity 700ms ease,
+    transform 700ms ease;
   pointer-events: none;
 }
 
 .chai-line-on {
-  opacity: 0.82;
+  opacity: 0.58;
   transform: translate(-50%, 0);
 }
+
 
 @media (prefers-reduced-motion: reduce) {
   .chai-warm {
