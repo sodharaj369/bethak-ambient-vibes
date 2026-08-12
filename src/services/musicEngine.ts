@@ -105,6 +105,12 @@ export class YouTubeEngine implements MusicEngine {
   private cursor = 0;
   /** Position to apply as soon as the loaded/cued video is addressable. */
   private pendingSeek: number | null = null;
+  /**
+   * Audio gate. Nothing may sound before the visitor has actually stepped into
+   * the bethak — a saved session, a ready player or a mounted component are all
+   * data, never permission.
+   */
+  private entered = false;
 
 
   constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
@@ -122,7 +128,7 @@ export class YouTubeEngine implements MusicEngine {
         events: {
           onReady: () => {
             this.ready = true;
-            if (this.wantPlay) this.player?.playVideo();
+            if (this.wantPlay && this.entered) this.player?.playVideo();
             this.emit();
           },
           onStateChange: (e: { data: number }) => {
@@ -156,8 +162,29 @@ export class YouTubeEngine implements MusicEngine {
     }, 250);
   }
 
+  /** The one user gesture that unlocks sound. */
+  markEntered() {
+    if (this.entered) return;
+    this.entered = true;
+    this.applyPendingSeek();
+  }
+
+  /** Back to the landing state: silence, without losing the sitting. */
+  leave() {
+    this.entered = false;
+    this.wantPlay = false;
+    this.playing = false;
+    try {
+      this.player?.pauseVideo();
+    } catch {
+      /* player not addressable */
+    }
+    this.emit();
+  }
+
   /** Enter the room: start playing with the volume rising gently from silence. */
   async fadeIn(durationMs = 700, target = 100) {
+    if (!this.entered) return;
     const steps = 14;
     try {
       this.player?.setVolume(0);
@@ -183,7 +210,9 @@ export class YouTubeEngine implements MusicEngine {
 
   /** Applies a restored position once the player can actually seek. */
   private applyPendingSeek() {
-    if (this.pendingSeek == null || !this.player) return;
+    // Seeking a cued video makes YouTube start playing, so a restored position
+    // waits until entry.
+    if (this.pendingSeek == null || !this.player || !this.entered) return;
     const d = this.player.getDuration();
     if (!Number.isFinite(d) || d <= 0) return;
     const target = Math.max(0, Math.min(this.pendingSeek, d - 2));
@@ -262,6 +291,7 @@ export class YouTubeEngine implements MusicEngine {
   }
 
   async play() {
+    if (!this.entered) return;
     this.wantPlay = true;
     if (this.ready) this.player?.playVideo();
     this.emit();
@@ -273,7 +303,8 @@ export class YouTubeEngine implements MusicEngine {
     this.emit();
   }
 
-  private load(autoplay: boolean) {
+  private load(autoplayRequested: boolean) {
+    const autoplay = autoplayRequested && this.entered;
     this.pendingSeek = null;
     const id = this.getCurrentTrack().youtubeId;
     this.wantPlay = autoplay;
