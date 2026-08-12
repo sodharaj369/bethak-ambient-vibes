@@ -7,6 +7,7 @@ import { MusicPlayer } from "@/components/MusicPlayer";
 import { MoodSelector } from "@/components/MoodSelector";
 import { DEFAULT_MOOD, SCENES, type MoodId } from "@/data/scenes";
 import { EXTERNAL_LINKS } from "@/data/playlist";
+import { readSession, writeSession } from "@/lib/bethakSession";
 
 const SITE_URL = "https://bethak-ambient-vibes.lovable.app";
 const OG_IMAGE =
@@ -58,7 +59,7 @@ function Index() {
   // Restore the last chosen mood after hydration (keeps SSR markup stable).
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(MOOD_KEY);
+      const saved = window.localStorage.getItem(MOOD_KEY) ?? readSession()?.mood;
       if (saved && SCENES.some((s) => s.id === saved)) setMood(saved as MoodId);
     } catch {
       /* storage blocked — stay on the default */
@@ -69,6 +70,7 @@ function Index() {
     setMood(id);
     try {
       window.localStorage.setItem(MOOD_KEY, id);
+      writeSession({ mood: id });
     } catch {
       /* ignore */
     }

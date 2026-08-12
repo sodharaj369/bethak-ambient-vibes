@@ -157,13 +157,15 @@ export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
     const reduced = prefersReducedMotion();
     const coverMs = reduced ? 120 : 300;
     setVeiled(true);
+    let lift = 0;
     const swap = window.setTimeout(() => {
       setShown(mood);
-      const lift = window.setTimeout(() => setVeiled(false), reduced ? 60 : 140);
-      timers.push(lift);
+      lift = window.setTimeout(() => setVeiled(false), reduced ? 60 : 140);
     }, coverMs);
-    const timers: number[] = [swap];
-    return () => timers.forEach((t) => window.clearTimeout(t));
+    return () => {
+      window.clearTimeout(swap);
+      window.clearTimeout(lift);
+    };
   }, [mood, shown]);
 
   return (
