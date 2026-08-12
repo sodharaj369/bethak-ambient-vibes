@@ -240,9 +240,9 @@
 }
 
 @utility text-ui {
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
-  color: oklch(0.98 0.01 85 / 0.88);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  color: oklch(0.98 0.01 85 / 0.5);
 }
 
 @utility text-glow {
@@ -254,10 +254,10 @@
 }
 
 @utility link-quiet {
-  opacity: 0.85;
-  transition: opacity 300ms ease;
+  opacity: 0.62;
+  transition: opacity 400ms ease;
   &:hover {
-    opacity: 1;
+    opacity: 0.95;
   }
 }
 
@@ -347,24 +347,24 @@
 @utility player {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 11px;
   width: 100%;
-  max-width: 720px;
-  padding: 8px 13px;
-  border-radius: 22px;
-  background: oklch(0.31 0.052 55 / 0.42);
-  backdrop-filter: blur(20px) saturate(135%);
-  border: 1px solid oklch(0.95 0.03 80 / 0.1);
+  max-width: 640px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: oklch(0.28 0.045 55 / 0.3);
+  backdrop-filter: blur(18px) saturate(125%);
+  border: 1px solid oklch(0.95 0.03 80 / 0.055);
   box-shadow:
-    0 30px 70px -26px oklch(0.08 0.02 60 / 0.6),
-    0 10px 28px -10px oklch(0.08 0.02 60 / 0.3),
-    inset 0 1px 0 oklch(0.98 0.02 85 / 0.06);
-  color: oklch(0.97 0.01 85);
+    0 26px 60px -28px oklch(0.08 0.02 60 / 0.5),
+    0 8px 22px -12px oklch(0.08 0.02 60 / 0.24),
+    inset 0 1px 0 oklch(0.98 0.02 85 / 0.045);
+  color: oklch(0.97 0.01 85 / 0.92);
   @media (min-width: 768px) {
-    gap: 14px;
-    padding: 10px 16px;
-    max-width: 720px;
-    border-radius: 26px;
+    gap: 13px;
+    padding: 9px 15px;
+    max-width: 660px;
+    border-radius: 24px;
   }
 }
 
@@ -372,18 +372,18 @@
   display: grid;
   animation: track-fade 300ms ease;
   place-items: center;
-  height: 52px;
-  width: 52px;
+  height: 48px;
+  width: 48px;
   flex: none;
-  border-radius: 14px;
+  border-radius: 13px;
   overflow: hidden;
-  background: oklch(0.35 0.06 55 / 0.6);
-  box-shadow: 0 6px 18px oklch(0.12 0.02 60 / 0.4);
+  background: oklch(0.35 0.06 55 / 0.5);
+  box-shadow: 0 5px 16px oklch(0.12 0.02 60 / 0.32);
   color: oklch(0.95 0.02 85);
   @media (min-width: 768px) {
-    height: 64px;
-    width: 64px;
-    border-radius: 16px;
+    height: 58px;
+    width: 58px;
+    border-radius: 15px;
   }
 }
 
@@ -870,32 +870,103 @@
   z-index: 20;
   display: flex;
   justify-content: center;
-  gap: 14px;
+  gap: 16px;
+  padding: 0 14px;
   @media (min-width: 768px) {
     top: calc(16% + clamp(7rem, 15vw, 13rem));
-    gap: 20px;
+    gap: 34px;
   }
 }
 
 @utility mood-word {
-  font-family: var(--font-devanagari);
-  font-size: 0.85rem;
-  letter-spacing: 0.06em;
+  position: relative;
+  background: none;
+  border: 0;
+  font-size: 0.64rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   line-height: 1;
-  padding: 6px 4px;
-  color: oklch(0.97 0.02 85 / 0.42);
-  text-shadow: 0 1px 10px oklch(0.15 0.02 60 / 0.7);
-  transition: color 400ms ease, opacity 400ms ease;
+  padding: 8px 2px;
+  color: oklch(0.97 0.02 85 / 0.4);
+  text-shadow: 0 1px 12px oklch(0.14 0.02 60 / 0.85);
+  transition: color 500ms ease, text-shadow 500ms ease;
+  @media (min-width: 768px) {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(0.9 0.09 78 / 0.75),
+      transparent
+    );
+    opacity: 0;
+    transform: scaleX(0.5);
+    transition: opacity 500ms ease, transform 500ms ease;
+  }
   &:hover {
-    color: oklch(0.98 0.02 85 / 0.75);
+    color: oklch(0.98 0.02 85 / 0.7);
   }
   &:focus-visible {
-    outline: 2px solid oklch(0.88 0.1 78 / 0.8);
-    outline-offset: 3px;
-    border-radius: 6px;
+    outline: none;
+    color: oklch(0.98 0.02 85 / 0.85);
+    &::after {
+      opacity: 0.6;
+      transform: scaleX(1);
+    }
   }
 }
 
 @utility mood-word-on {
-  color: oklch(0.9 0.11 78 / 0.95);
+  color: oklch(0.97 0.04 82 / 0.92);
+  text-shadow:
+    0 1px 12px oklch(0.14 0.02 60 / 0.85),
+    0 0 16px oklch(0.88 0.1 78 / 0.35);
+  &::after {
+    opacity: 1;
+    transform: scaleX(1);
+  }
 }
+
+/* A whisper of shade behind the title block so text stays legible on the
+   brighter frames of the video. Never a panel — just a soft breath. */
+@utility center-scrim {
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  translate: -50% 0;
+  width: min(92vw, 780px);
+  height: clamp(16rem, 40vh, 26rem);
+  pointer-events: none;
+  z-index: 5;
+  background: radial-gradient(
+    ellipse at center,
+    oklch(0.13 0.02 60 / 0.3) 0%,
+    oklch(0.13 0.02 60 / 0.16) 45%,
+    transparent 72%
+  );
+}
+
+/* Corner-weighted vignette: keeps the room bright, lets the chrome breathe. */
+@utility room-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, oklch(0.13 0.02 60 / 0.22) 0%, transparent 18%),
+    linear-gradient(0deg, oklch(0.13 0.02 60 / 0.3) 0%, transparent 26%),
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 52%,
+      oklch(0.13 0.02 60 / 0.24) 100%
+    );
+}
+
