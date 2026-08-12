@@ -79,7 +79,9 @@ export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
       </div>
       <div className="absolute inset-0 bg-[oklch(0.15_0.03_60_/_0.08)]" />
       <div className="hour-wash" data-phase={phase} />
+      <div className="room-vignette" aria-hidden="true" />
+      <div className="center-scrim" aria-hidden="true" />
       <div className="lamp-glow" aria-hidden="true" />
-    </div>
+
   );
 }
