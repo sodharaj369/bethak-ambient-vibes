@@ -870,7 +870,8 @@
   z-index: 20;
   display: flex;
   justify-content: center;
-  gap: 22px;
+  gap: 16px;
+  padding: 0 14px;
   @media (min-width: 768px) {
     top: calc(16% + clamp(7rem, 15vw, 13rem));
     gap: 34px;
