@@ -26,10 +26,10 @@ export type Scene = {
 export const SCENES: Scene[] = [
   // Window + moon are around x 0.62 in every scene; the sofa/chai sit left of
   // it, so the portrait focal point sits between them and leans window-ward.
-  { id: "raat", label: "रात", name: "Raat Ki Bethak", file: "Default_theme", mobile: { x: "62%", y: "48%" } },
-  { id: "baarish", label: "बारिश", name: "Baarish Ki Bethak", file: "rainly_scene", mobile: { x: "65%", y: "46%" } },
-  { id: "shaam", label: "शाम", name: "Shaam Ki Bethak", file: "sunset_scene", mobile: { x: "63%", y: "47%" } },
-  { id: "yaadein", label: "यादें", name: "Yaadon Ki Bethak", file: "ideal_1", mobile: { x: "60%", y: "48%" } },
+  { id: "raat", label: "रात", name: "Raat Ki Bethak", file: "Default_theme", mobile: { x: "67%", y: "45%" } },
+  { id: "baarish", label: "बारिश", name: "Baarish Ki Bethak", file: "rainly_scene", mobile: { x: "68%", y: "44%" } },
+  { id: "shaam", label: "शाम", name: "Shaam Ki Bethak", file: "sunset_scene", mobile: { x: "67%", y: "45%" } },
+  { id: "yaadein", label: "यादें", name: "Yaadon Ki Bethak", file: "ideal_1", mobile: { x: "65%", y: "46%" } },
 ];
 
 export const DEFAULT_MOOD: MoodId = "raat";
