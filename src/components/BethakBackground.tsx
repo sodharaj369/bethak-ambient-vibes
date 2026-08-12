@@ -156,7 +156,14 @@ function SceneLayer({ moodId, active }: { moodId: MoodId; active: boolean }) {
 }
 
 
-export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
+export function BethakBackground({
+  mood = DEFAULT_MOOD,
+  started = true,
+}: {
+  mood?: MoodId;
+  /** The ambient video only runs once the visitor has entered the room. */
+  started?: boolean;
+}) {
 
   // Start on the approved look, then settle into the real hour after mount
   // (keeps SSR markup stable and the change imperceptible).
