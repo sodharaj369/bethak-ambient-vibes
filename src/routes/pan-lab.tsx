@@ -37,7 +37,9 @@ export const Route = createFileRoute("/pan-lab")({
 function PanLab() {
   const [mood, setMood] = useState<MoodId>(DEFAULT_MOOD);
   const [pan, setPan] = useState(0);
-  const [limit, setLimit] = useState(0);
+  // Asymmetric: the default crop does not sit in the middle of the frame,
+  // so each direction gets exactly its own overscan and no more.
+  const [range, setRange] = useState({ min: 0, max: 0 });
   const [portrait, setPortrait] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: number; x: number; from: number } | null>(null);
@@ -52,9 +54,10 @@ function PanLab() {
     // Undo the current pan to get the neutral (default crop) rect.
     const left = r.left - pan;
     const right = r.right - pan;
-    const room = Math.max(0, Math.min(-left, right - window.innerWidth));
-    setLimit(Math.round(room));
-    setPan((p) => Math.max(-room, Math.min(room, p)));
+    const max = Math.max(0, Math.round(-left)); // slide right, reveal left side
+    const min = -Math.max(0, Math.round(right - window.innerWidth));
+    setRange({ min, max });
+    setPan((p) => Math.max(min, Math.min(max, p)));
   }, [pan]);
 
   useEffect(() => {
@@ -68,8 +71,10 @@ function PanLab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mood]);
 
+  const span = range.max - range.min;
+
   const onDown = (e: React.PointerEvent) => {
-    if (!portrait || limit === 0) return;
+    if (!portrait || span === 0) return;
     drag.current = { id: e.pointerId, x: e.clientX, from: pan };
   };
   const onMove = (e: React.PointerEvent) => {
@@ -77,14 +82,15 @@ function PanLab() {
     if (!d || d.id !== e.pointerId) return;
     // Vertical movement is ignored entirely; only dx counts.
     const next = d.from + (e.clientX - d.x);
-    setPan(Math.max(-limit, Math.min(limit, next)));
+    setPan(Math.max(range.min, Math.min(range.max, next)));
   };
   const onUp = (e: React.PointerEvent) => {
     if (drag.current?.id === e.pointerId) drag.current = null;
   };
 
-  const pct = limit ? Math.round((pan / limit) * 100) : 0;
+  const pct = pan >= 0 ? (range.max ? Math.round((pan / range.max) * 100) : 0) : range.min ? -Math.round((pan / range.min) * 100) : 0;
   const vars = useMemo(() => ({ "--pan-x": `${pan}px` }) as React.CSSProperties, [pan]);
+
 
   return (
     <main
