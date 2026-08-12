@@ -4,8 +4,8 @@
  * A small curated, local list. Never generated, never fetched, never stored.
  */
 
-/** The very first sip always says the same thing. */
-export const CHAI_FIRST_LINE = "कुछ देर और बैठिए।";
+/** The very first sip just names the gesture, quietly. */
+export const CHAI_FIRST_LINE = "चाय की एक चुस्की?";
 
 export const CHAI_LINES: string[] = [
   "चाय ठंडी हो सकती है, बातें नहीं।",
@@ -17,6 +17,7 @@ export const CHAI_LINES: string[] = [
   "इस कमरे को आपकी आदत हो चली है।",
   "बाहर की दुनिया थोड़ी देर रुक सकती है।",
   "धीरे पीजिए, रात लंबी है।",
+  "कुछ देर और बैठिए।",
 ];
 
 /** Picks a line, never the same one twice in a row. */
