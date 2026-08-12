@@ -108,15 +108,22 @@ export function MusicPlayer({
   const draggingRef = useRef(false);
 
   // Silently pick the sitting back up: same song, roughly the same place.
+  // The saved mood is only restored after hydration, so the remembered song
+  // may belong to a session that arrives a tick later — keep looking until it
+  // is found once, and never once the visitor is already inside the room.
+  const restored = useRef(false);
   useEffect(() => {
+    if (restored.current || autoStart) return;
     const session = readSession();
-    if (!isFresh(session) || !session?.trackId) return;
+    if (!isFresh(session) || !session?.trackId) {
+      restored.current = true;
+      return;
+    }
     const index = tracks.findIndex((t) => t.id === session.trackId);
     if (index < 0) return;
+    restored.current = true;
     engine.restoreSession(index, session.position ?? 0);
-    // Only on first mount: later mood changes must not rewind the ghazal.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [engine]);
+  }, [engine, tracks, autoStart]);
 
   // Mood change swaps the curated session underneath, without restarting a
   // song that also belongs to the new sitting.
@@ -129,15 +136,27 @@ export function MusicPlayer({
     ambience.setMood(mood);
   }, [ambience, mood]);
 
-  // Leaving the room: stop the ambience cleanly.
+  // Leaving the room: stop the ambience cleanly. Coming back from the browser's
+  // back/forward cache the visitor is still inside, so the gate is re-armed —
+  // silently: nothing resumes on its own, the controls simply work again.
   useEffect(() => {
     const stop = () => {
       ambience.stop();
       engine.leave();
     };
+    const restore = (e: PageTransitionEvent) => {
+      if (!e.persisted || !autoStart) return;
+      engine.markEntered();
+      ambience.start(mood);
+    };
     window.addEventListener("pagehide", stop);
-    return () => window.removeEventListener("pagehide", stop);
-  }, [ambience, engine]);
+    window.addEventListener("pageshow", restore);
+    return () => {
+      window.removeEventListener("pagehide", stop);
+      window.removeEventListener("pageshow", restore);
+    };
+  }, [ambience, engine, autoStart, mood]);
+
 
   // Remember where we are, without ever interrupting playback.
   useEffect(() => {
