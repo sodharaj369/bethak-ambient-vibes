@@ -148,7 +148,9 @@ export class YouTubeEngine implements MusicEngine {
     });
     // Reads live player time — no simulated progress.
     this.ticker = setInterval(() => {
-      if (this.ready) this.emit();
+      if (!this.ready) return;
+      this.applyPendingSeek();
+      this.emit();
     }, 250);
   }
 
@@ -181,8 +183,8 @@ export class YouTubeEngine implements MusicEngine {
     this.index = index;
     this.ensureOrder();
     this.cursor = Math.max(0, this.order.indexOf(index));
-    this.pendingSeek = position > 5 ? position : null;
     this.load(false);
+    this.pendingSeek = position > 5 ? position : null;
     if (this.ready) this.applyPendingSeek();
   }
 
@@ -249,6 +251,7 @@ export class YouTubeEngine implements MusicEngine {
   }
 
   private load(autoplay: boolean) {
+    this.pendingSeek = null;
     const id = this.getCurrentTrack().youtubeId;
     this.wantPlay = autoplay;
     this.settling = true;
