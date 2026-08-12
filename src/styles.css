@@ -495,10 +495,11 @@
 }
 
 @utility ctl-main {
-  height: 38px;
-  width: 38px;
-  background: oklch(0.98 0.01 85 / 0.12);
+  height: 34px;
+  width: 34px;
+  background: oklch(0.98 0.01 85 / 0.1);
 }
+
 
 /* Barely-there warm breathing while a ghazal is playing. */
 @utility ctl-breathing {
