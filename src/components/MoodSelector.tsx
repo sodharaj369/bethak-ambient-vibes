@@ -16,7 +16,7 @@ export function MoodSelector({
         <button
           key={s.id}
           type="button"
-          className={`mood-word${s.id === mood ? " mood-word-on" : ""}`}
+          className={`mood-word font-devanagari${s.id === mood ? " mood-word-on" : ""}`}
           aria-pressed={s.id === mood}
           title={s.name}
           onClick={() => onChange(s.id)}

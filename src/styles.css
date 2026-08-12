@@ -902,19 +902,20 @@
   position: relative;
   background: none;
   border: 0;
-  font-size: 0.64rem;
+  font-family: var(--font-devanagari);
+  font-size: 0.95rem;
   font-weight: 400;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  line-height: 1;
-  padding: 8px 2px;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  padding: 6px 2px;
   color: oklch(0.96 0.025 82 / 0.62);
   text-shadow: 0 1px 12px oklch(0.14 0.02 60 / 0.85);
   transition: color 500ms ease, text-shadow 500ms ease;
   @media (min-width: 768px) {
-    font-size: 0.7rem;
-    letter-spacing: 0.22em;
+    font-size: 1.05rem;
+    letter-spacing: 0.05em;
   }
+
   &::after {
     content: "";
     position: absolute;
