@@ -20,16 +20,16 @@ export type Scene = {
    * Portrait-only camera. Desktop framing is never affected.
    * x/y = focal point inside the 16:9 frame, zoom = width in viewport widths.
    */
-  mobile?: { x: string; y: string; zoom: number };
+  mobile?: { x: string; y: string };
 };
 
 export const SCENES: Scene[] = [
   // Window + moon are around x 0.62 in every scene; the sofa/chai sit left of
   // it, so the portrait focal point sits between them and leans window-ward.
-  { id: "raat", label: "रात", name: "Raat Ki Bethak", file: "Default_theme", mobile: { x: "57%", y: "47%", zoom: 2.05 } },
-  { id: "baarish", label: "बारिश", name: "Baarish Ki Bethak", file: "rainly_scene", mobile: { x: "61%", y: "45%", zoom: 1.95 } },
-  { id: "shaam", label: "शाम", name: "Shaam Ki Bethak", file: "sunset_scene", mobile: { x: "58%", y: "46%", zoom: 2.0 } },
-  { id: "yaadein", label: "यादें", name: "Yaadon Ki Bethak", file: "ideal_1", mobile: { x: "56%", y: "47%", zoom: 2.05 } },
+  { id: "raat", label: "रात", name: "Raat Ki Bethak", file: "Default_theme", mobile: { x: "62%", y: "48%" } },
+  { id: "baarish", label: "बारिश", name: "Baarish Ki Bethak", file: "rainly_scene", mobile: { x: "65%", y: "46%" } },
+  { id: "shaam", label: "शाम", name: "Shaam Ki Bethak", file: "sunset_scene", mobile: { x: "63%", y: "47%" } },
+  { id: "yaadein", label: "यादें", name: "Yaadon Ki Bethak", file: "ideal_1", mobile: { x: "60%", y: "48%" } },
 ];
 
 export const DEFAULT_MOOD: MoodId = "raat";

@@ -216,7 +216,6 @@ export function BethakBackground({
     ? ({
         "--m-x": m.x,
         "--m-y": m.y,
-        "--m-zoom": String(m.zoom),
       } as React.CSSProperties)
     : undefined;
 
