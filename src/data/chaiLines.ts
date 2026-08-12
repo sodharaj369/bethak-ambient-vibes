@@ -22,5 +22,5 @@ export const CHAI_LINES: string[] = [
 /** Picks a line, never the same one twice in a row. */
 export function nextChaiLine(previous: string | null): string {
   const pool = CHAI_LINES.filter((l) => l !== previous);
-  return pool[Math.floor(Math.random() * pool.length)] ?? CHAI_LINES[0];
+  return pool[Math.floor(Math.random() * pool.length)] ?? CHAI_FIRST_LINE;
 }
