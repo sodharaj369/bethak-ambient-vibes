@@ -132,8 +132,10 @@ export class YouTubeEngine implements MusicEngine {
             if (e.data === 1 || e.data === 5) this.settling = false;
             if (e.data === 1) this.errorStreak = 0;
             if (e.data === 1 || e.data === 2) this.playing = e.data === 1;
+            this.applyPendingSeek();
             this.emit();
           },
+
           onError: () => {
             // Unplayable video (embedding/region/deleted): never pretend it plays.
             this.playing = false;
