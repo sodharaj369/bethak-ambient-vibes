@@ -1069,3 +1069,15 @@
     transition-duration: 200ms;
   }
 }
+
+/* Player and links settle in only after the room is fully revealed. */
+@utility ui-reveal {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 500ms ease;
+}
+
+@utility ui-reveal-on {
+  opacity: 1;
+  pointer-events: auto;
+}
