@@ -135,7 +135,9 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
         <div className="debug-panel">
           <div>chai discovered: {chaiFound ? "YES" : "NO"}</div>
           <div>harmonium discovered: {found ? "YES" : "NO"}</div>
-          <div>harmonium hotspot: {enabled && chaiFound && !found ? "ACTIVE" : "INACTIVE"}</div>
+          <div>harmonium hotspot: {enabled ? "ACTIVE" : "INACTIVE"}</div>
+          <div>harmonium hint: {enabled && chaiFound && !found ? "ON" : "OFF"}</div>
+
         </div>
       )}
     </div>
