@@ -132,13 +132,15 @@ function PanLab() {
           }}
         >
           <div>
-            pan {pct}% ({pan}px of ±{limit}px) · {portrait ? "portrait: pan on" : "desktop/landscape: pan off"}
+            pan {pct}% ({pan}px · range {range.min}…{range.max}px) ·{" "}
+            {portrait ? "portrait: pan on" : "desktop/landscape: pan off"}
           </div>
           <input
             type="range"
-            min={-limit || -1}
-            max={limit || 1}
+            min={range.min || -1}
+            max={range.max || 1}
             value={pan}
+
             onChange={(e) => setPan(Number(e.target.value))}
             style={{ width: "100%" }}
             aria-label="Pan position"
