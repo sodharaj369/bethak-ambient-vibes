@@ -163,7 +163,6 @@ export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
 
   // New scene is mounted and running underneath: lift the darkness away.
   useEffect(() => {
-    console.log("lift-effect", veiled, mood, shown);
     if (!veiled || mood !== shown) return;
     const reduced = prefersReducedMotion();
     const id = window.setTimeout(() => setVeiled(false), reduced ? 60 : 160);
