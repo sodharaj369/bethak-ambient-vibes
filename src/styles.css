@@ -348,24 +348,24 @@
 @utility player {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   width: 100%;
-  max-width: 640px;
-  padding: 7px 12px;
-  border-radius: 20px;
-  background: oklch(0.28 0.045 55 / 0.3);
+  max-width: 560px;
+  padding: 6px 11px;
+  border-radius: 18px;
+  background: oklch(0.28 0.045 55 / 0.26);
   backdrop-filter: blur(18px) saturate(125%);
-  border: 1px solid oklch(0.95 0.03 80 / 0.055);
+  border: 1px solid oklch(0.95 0.03 80 / 0.05);
   box-shadow:
-    0 26px 60px -28px oklch(0.08 0.02 60 / 0.5),
-    0 8px 22px -12px oklch(0.08 0.02 60 / 0.24),
-    inset 0 1px 0 oklch(0.98 0.02 85 / 0.045);
-  color: oklch(0.97 0.01 85 / 0.92);
+    0 22px 52px -28px oklch(0.08 0.02 60 / 0.45),
+    0 7px 18px -12px oklch(0.08 0.02 60 / 0.2),
+    inset 0 1px 0 oklch(0.98 0.02 85 / 0.04);
+  color: oklch(0.97 0.01 85 / 0.9);
   @media (min-width: 768px) {
-    gap: 13px;
-    padding: 9px 15px;
-    max-width: 660px;
-    border-radius: 24px;
+    gap: 11px;
+    padding: 8px 13px;
+    max-width: 580px;
+    border-radius: 21px;
   }
 }
 
@@ -373,20 +373,21 @@
   display: grid;
   animation: track-fade 300ms ease;
   place-items: center;
-  height: 48px;
-  width: 48px;
+  height: 42px;
+  width: 42px;
   flex: none;
-  border-radius: 13px;
+  border-radius: 11px;
   overflow: hidden;
   background: oklch(0.35 0.06 55 / 0.5);
-  box-shadow: 0 5px 16px oklch(0.12 0.02 60 / 0.32);
+  box-shadow: 0 5px 16px oklch(0.12 0.02 60 / 0.3);
   color: oklch(0.95 0.02 85);
   @media (min-width: 768px) {
-    height: 58px;
-    width: 58px;
-    border-radius: 15px;
+    height: 50px;
+    width: 50px;
+    border-radius: 13px;
   }
 }
+
 
 @utility track-meta {
   min-width: 0;
@@ -904,7 +905,7 @@
   text-transform: uppercase;
   line-height: 1;
   padding: 8px 2px;
-  color: oklch(0.97 0.02 85 / 0.4);
+  color: oklch(0.96 0.025 82 / 0.62);
   text-shadow: 0 1px 12px oklch(0.14 0.02 60 / 0.85);
   transition: color 500ms ease, text-shadow 500ms ease;
   @media (min-width: 768px) {
@@ -929,11 +930,11 @@
     transition: opacity 500ms ease, transform 500ms ease;
   }
   &:hover {
-    color: oklch(0.98 0.02 85 / 0.7);
+    color: oklch(0.98 0.025 82 / 0.85);
   }
   &:focus-visible {
     outline: none;
-    color: oklch(0.98 0.02 85 / 0.85);
+    color: oklch(0.99 0.025 82 / 0.95);
     &::after {
       opacity: 0.6;
       transform: scaleX(1);
@@ -942,7 +943,8 @@
 }
 
 @utility mood-word-on {
-  color: oklch(0.97 0.04 82 / 0.92);
+  color: oklch(0.99 0.035 82 / 1);
+
   text-shadow:
     0 1px 12px oklch(0.14 0.02 60 / 0.85),
     0 0 16px oklch(0.88 0.1 78 / 0.35);
