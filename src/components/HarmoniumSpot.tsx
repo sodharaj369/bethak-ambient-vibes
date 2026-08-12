@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { sceneById, type MoodId } from "@/data/scenes";
-import { playHarmoniumNote } from "@/services/harmoniumSound";
+import { playHarmoniumNote, preloadHarmoniumNote } from "@/services/harmoniumSound";
+
 
 /** How long the single small line holds before it fades. */
 const LINE_MS = 1800;
