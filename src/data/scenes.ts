@@ -53,7 +53,7 @@ export const SCENES: Scene[] = [
     file: "Default_theme",
     mobile: { x: "67%", y: "45%" },
     chai: { x: "53.5%", y: "76%", w: "11%", h: "13%", mobile: { w: "17%", h: "18%" } },
-    harmonium: { x: "84%", y: "72%", w: "14%", h: "14%", mobile: { w: "18%", h: "17%" } },
+    harmonium: { x: "80.5%", y: "71%", w: "18%", h: "17%", mobile: { w: "22%", h: "20%" } },
   },
   {
     id: "baarish",
@@ -62,7 +62,7 @@ export const SCENES: Scene[] = [
     file: "rainly_scene",
     mobile: { x: "60%", y: "44%" },
     chai: { x: "53%", y: "76.5%", w: "11%", h: "13%", mobile: { w: "17%", h: "18%" } },
-    harmonium: { x: "84%", y: "72.5%", w: "14%", h: "14%", mobile: { w: "18%", h: "17%" } },
+    harmonium: { x: "81%", y: "71%", w: "18%", h: "17%", mobile: { w: "22%", h: "20%" } },
   },
   {
     id: "shaam",
@@ -71,7 +71,7 @@ export const SCENES: Scene[] = [
     file: "sunset_scene",
     mobile: { x: "67%", y: "45%" },
     chai: { x: "53.5%", y: "77%", w: "11%", h: "13%", mobile: { w: "17%", h: "18%" } },
-    harmonium: { x: "84%", y: "73%", w: "14%", h: "14%", mobile: { w: "18%", h: "17%" } },
+    harmonium: { x: "81%", y: "72%", w: "18%", h: "17%", mobile: { w: "22%", h: "20%" } },
   },
   {
     id: "yaadein",
@@ -80,7 +80,7 @@ export const SCENES: Scene[] = [
     file: "ideal_1",
     mobile: { x: "65%", y: "46%" },
     chai: { x: "53%", y: "77%", w: "11%", h: "13%", mobile: { w: "17%", h: "18%" } },
-    harmonium: { x: "84%", y: "73%", w: "14%", h: "14%", mobile: { w: "18%", h: "17%" } },
+    harmonium: { x: "81%", y: "72.5%", w: "18%", h: "17%", mobile: { w: "22%", h: "20%" } },
   },
 ];
 
