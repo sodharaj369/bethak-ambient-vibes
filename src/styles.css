@@ -978,6 +978,22 @@
   );
 }
 
+/* Portrait: the window sits behind the title block, so the breath of shade
+   needs to be a touch deeper — still no panel, still no edges. */
+@media (orientation: portrait) and (max-width: 820px) {
+  .center-scrim {
+    top: 6%;
+    width: min(104vw, 620px);
+    height: clamp(18rem, 46vh, 30rem);
+    background: radial-gradient(
+      ellipse at center,
+      oklch(0.13 0.025 58 / 0.42) 0%,
+      oklch(0.13 0.025 58 / 0.24) 46%,
+      transparent 74%
+    );
+  }
+}
+
 /* Corner-weighted vignette: keeps the room bright, lets the chrome breathe. */
 @utility room-vignette {
   position: absolute;
