@@ -208,7 +208,7 @@ export function BethakBackground({
       <div className="room-frame">
         <div className="room-breathe">
           {mounted.map((id) => (
-            <SceneLayer key={id} moodId={id} active={id === shown} />
+            <SceneLayer key={id} moodId={id} active={started && id === shown} />
           ))}
         </div>
       </div>
