@@ -3,6 +3,8 @@ import { getYouTubeEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist, type MusicTrack } from "@/data/playlist";
 import type { MoodId } from "@/data/scenes";
 import { getAmbienceEngine } from "@/services/ambienceEngine";
+import { stopChaiSound } from "@/services/chaiSound";
+import { stopHarmoniumNotes } from "@/services/harmoniumSound";
 import { PlaylistPanel } from "@/components/PlaylistPanel";
 import { isFresh, readSession, writeSession } from "@/lib/bethakSession";
 
@@ -299,7 +301,16 @@ export function MusicPlayer({
                 aria-label={state.isPlaying ? "Pause" : "Play"}
                 title={state.canPlay ? undefined : "Connecting to YouTube player…"}
                 aria-disabled={!state.canPlay}
-                onClick={() => (state.isPlaying ? engine.pause() : void engine.play())}
+                onClick={() => {
+                  if (state.isPlaying) {
+                    engine.pause();
+                    ambience.suspend();
+                    return;
+                  }
+                  // Explicit gesture: the room may breathe again.
+                  ambience.start(mood);
+                  void engine.play();
+                }}
               >
                 {state.isPlaying ? <PauseIcon /> : <PlayIcon />}
               </button>
