@@ -1402,16 +1402,79 @@
   }
 }
 
-/* The harmonium's own light: even quieter than the chai's, and it waits
-   longer before offering itself as the room's second small secret. */
+/* The harmonium's own light: warm lamp-light gently catching the instrument.
+   Clearly noticeable, but still light in a room — no ring, no outline. */
 .harmonium-hint {
-  inset: -10%;
-  filter: blur(12px);
+  inset: -18%;
+  filter: blur(14px);
   background: radial-gradient(
-    circle at 50% 58%,
-    oklch(0.92 0.08 72 / 0.12),
-    oklch(0.88 0.08 66 / 0.05) 44%,
+    circle at 50% 55%,
+    oklch(0.95 0.11 76 / 0.34),
+    oklch(0.9 0.1 68 / 0.16) 45%,
     transparent 72%
   );
-  animation: chai-discover 9s ease-in-out 9s infinite;
+  animation: harmonium-breathe 3s ease-in-out 1.2s infinite;
+}
+
+@keyframes harmonium-breathe {
+  0%,
+  100% {
+    opacity: 0.34;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chai-hit:hover .harmonium-hint {
+    animation: none;
+    opacity: 1;
+    transform: scale(1.06);
+    transition:
+      opacity 500ms ease,
+      transform 500ms ease;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .harmonium-hint {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+/* Development only: see exactly where the invisible hotspot sits. */
+.hotspot-debug {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed oklch(0.9 0.15 150 / 0.7);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.hotspot-debug::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 0;
+  top: -14px;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: oklch(0.9 0.15 150 / 0.85);
+  white-space: nowrap;
+}
+
+.debug-panel {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  z-index: 60;
+  font-size: 10px;
+  line-height: 1.5;
+  font-family: ui-monospace, monospace;
+  color: oklch(0.92 0.12 150 / 0.85);
+  background: oklch(0.15 0.02 60 / 0.55);
+  border-radius: 6px;
+  padding: 5px 7px;
+  pointer-events: none;
 }
