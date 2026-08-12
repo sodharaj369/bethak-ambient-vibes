@@ -87,19 +87,18 @@ function Index() {
     setEntered(true);
     // The overlay element stays in place and only its opacity animates,
     // starting a beat after the video has begun underneath.
-    window.setTimeout(() => setLifting(true), 400);
-    window.setTimeout(() => setShowPlayer(true), 2100);
-    window.setTimeout(() => setVeilGone(true), 2600);
+    // Nothing here waits on media: the reveal starts on the gesture itself.
+    window.setTimeout(() => setLifting(true), 80);
+    window.setTimeout(() => setShowPlayer(true), 800);
+    window.setTimeout(() => setVeilGone(true), 2000);
   };
 
   return (
     <main className="bethak-screen">
       <BethakBackground mood={mood} started={entered} />
-      {entered && (
-        <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`}>
-          <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
-        </div>
-      )}
+      <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} aria-hidden={!showPlayer}>
+        <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
+      </div>
 
       <div className="title-slot">
         <BethakTitle />
@@ -107,11 +106,11 @@ function Index() {
 
       <MoodSelector mood={mood} onChange={chooseMood} />
 
-      {entered && (
-        <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`}>
-          <MusicPlayer autoStart={entered} />
-        </div>
-      )}
+      {/* Mounted from the start (invisible) so the audio engine is warm and
+          the player can appear instantly on entry — never a loading state. */}
+      <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} aria-hidden={!showPlayer}>
+        <MusicPlayer autoStart={entered} />
+      </div>
 
       {!veilGone && (
         <div className={`enter-veil ${lifting ? "enter-veil-out" : ""}`}>
