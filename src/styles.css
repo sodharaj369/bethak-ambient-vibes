@@ -170,26 +170,24 @@
 /* Mirrors object-cover so percentage-positioned ambient overlays line up
    with the illustration at every viewport size.
 
-   Portrait phones get their own camera: a full-cover crop would throw away
-   ~75% of the frame width (window, moon, rain), so instead the room is scaled
-   to a readable band and framed around a per-scene focal point
-   (--m-x / --m-y / --m-zoom, set from src/data/scenes.ts). No stretching —
-   the 16:9 ratio is preserved exactly, only the crop window changes. */
+   Portrait phones always fill the whole viewport (no bars, no letterbox, no
+   stretching): the frame keeps its 16:9 ratio and is simply large enough to
+   cover 100dvh. Only the crop window moves — a per-scene focal point
+   (--m-x / --m-y from src/data/scenes.ts) is placed at the centre of the
+   screen so the window/moon/rain never gets cropped away. */
 @utility room-frame {
   position: absolute;
-  top: var(--m-y, 47%);
-  left: var(--m-x, 57%);
-  transform: translate(calc(-1 * var(--m-x, 57%)), calc(-1 * var(--m-y, 47%)));
-  width: min(calc(100vw * var(--m-zoom, 2.05)), max(100vw, calc(100dvh * 1.791)));
-  height: calc(min(calc(100vw * var(--m-zoom, 2.05)), max(100vw, calc(100dvh * 1.791))) / 1.791);
+  top: 50%;
+  left: 50%;
+  transform: translate(calc(-1 * var(--m-x, 62%)), calc(-1 * var(--m-y, 48%)));
+  width: max(100vw, calc(100dvh * 1.791));
+  height: max(100dvh, calc(100vw / 1.791));
+  min-height: 100dvh;
   @media (min-width: 768px), (orientation: landscape) {
-    top: 50%;
-    left: 50%;
     transform: translate(-50%, -50%);
-    width: max(100vw, calc(100dvh * 1.791));
-    height: max(100dvh, calc(100vw / 1.791));
   }
 }
+
 
 
 /* Camera is locked: no zoom, pan, or Ken Burns drift. The room only moves
