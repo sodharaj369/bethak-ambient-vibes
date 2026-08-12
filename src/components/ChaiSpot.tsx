@@ -6,6 +6,9 @@ import { playChaiSound } from "@/services/chaiSound";
 /** How long a whisper holds before it fades away again. */
 const LINE_MS = 1800;
 
+/** Remembers, for this visit only, that the chai has already been found. */
+const FOUND_KEY = "bethakChaiFound";
+
 /**
  * Chai Ki Chuski — the one small secret in the room.
  *
@@ -21,14 +24,32 @@ export function ChaiSpot({ mood, enabled }: { mood: MoodId; enabled: boolean }) 
   const [visible, setVisible] = useState(false);
   const [sipped, setSipped] = useState(false);
   const [nudge, setNudge] = useState(0);
+  /** The discovery halo is shown once per visit, until the chai is found. */
+  const [found, setFound] = useState(true);
   const lastLine = useRef<string | null>(null);
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
+  // Has this visitor already found the chai in this session?
+  useEffect(() => {
+    try {
+      setFound(window.sessionStorage.getItem(FOUND_KEY) === "1");
+    } catch {
+      setFound(false);
+    }
+  }, []);
+
   const sip = useCallback(() => {
     playChaiSound();
     setNudge((n) => n + 1);
+    // Found: the room stops trying to catch the eye for the rest of the visit.
+    setFound(true);
+    try {
+      window.sessionStorage.setItem(FOUND_KEY, "1");
+    } catch {
+      /* storage blocked — the halo simply ends with this tap */
+    }
 
     // The first sip always answers. After that the room mostly stays quiet.
     const speak = !sipped || Math.random() < 0.4;
@@ -72,6 +93,7 @@ export function ChaiSpot({ mood, enabled }: { mood: MoodId; enabled: boolean }) 
             tabIndex={enabled ? 0 : -1}
             onClick={sip}
           >
+            {enabled && !found && <span className="chai-hint" aria-hidden="true" />}
             <span key={nudge} className="chai-warm" aria-hidden="true" />
           </button>
           {line && (
