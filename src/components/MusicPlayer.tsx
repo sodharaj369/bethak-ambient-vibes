@@ -131,10 +131,13 @@ export function MusicPlayer({
 
   // Leaving the room: stop the ambience cleanly.
   useEffect(() => {
-    const stop = () => ambience.stop();
+    const stop = () => {
+      ambience.stop();
+      engine.leave();
+    };
     window.addEventListener("pagehide", stop);
     return () => window.removeEventListener("pagehide", stop);
-  }, [ambience]);
+  }, [ambience, engine]);
 
   // Remember where we are, without ever interrupting playback.
   useEffect(() => {
@@ -152,7 +155,14 @@ export function MusicPlayer({
 
   // Entering the room is a real user gesture: start the music from it.
   useEffect(() => {
-    if (!autoStart) return;
+    if (!autoStart) {
+      // Landing state: the engine may be warm, but it must stay silent.
+      engine.leave();
+      ambience.stop();
+      return;
+    }
+    // Only this gesture unlocks sound.
+    engine.markEntered();
     // Music arrives a beat after the room starts opening, rising from silence.
     const id = window.setTimeout(() => void engine.fadeIn(700), 400);
     // Same gesture initialises the ambient room sound.
