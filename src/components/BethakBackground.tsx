@@ -211,7 +211,7 @@ export function BethakBackground({
     return () => window.clearTimeout(id);
   }, [veiled, mood, shown]);
 
-  const m = sceneById(shown).mobile;
+  const m = sceneById(shown)?.mobile;
   const frameVars = m
     ? ({
         "--m-x": m.x,
