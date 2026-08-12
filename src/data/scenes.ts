@@ -30,5 +30,7 @@ export const DEFAULT_MOOD: MoodId = "raat";
 const base = () => import.meta.env.BASE_URL || "/";
 
 export const videoUrl = (s: Scene) => `${base()}scenes/${s.file}.mp4`;
+/** Pre-rendered reversed copy, used for the seamless ping-pong loop. */
+export const reverseVideoUrl = (s: Scene) => `${base()}scenes/${s.file}.rev.mp4`;
 export const posterUrl = (s: Scene) => `${base()}scenes/${s.file}.jpg`;
 export const sceneById = (id: MoodId) => SCENES.find((s) => s.id === id) ?? SCENES[0];
