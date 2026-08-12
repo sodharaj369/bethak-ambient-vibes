@@ -30,12 +30,12 @@ export function TopBar({
         {time}
       </span>
 
-      <span className="pointer-events-auto flex items-center gap-4">
+      <span className="pointer-events-auto flex items-center gap-5">
         <a className="text-ui text-glow link-quiet" href={spotifyUrl} target="_blank" rel="noreferrer">
-          Spotify <span aria-hidden="true">↗</span>
+          Spotify
         </a>
         <a className="text-ui text-glow link-quiet" href={youtubeUrl} target="_blank" rel="noreferrer">
-          YouTube Music <span aria-hidden="true">↗</span>
+          YouTube
         </a>
       </span>
     </div>

@@ -82,6 +82,8 @@ export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
       <div className="room-vignette" aria-hidden="true" />
       <div className="center-scrim" aria-hidden="true" />
       <div className="lamp-glow" aria-hidden="true" />
+    </div>
+
 
   );
 }
