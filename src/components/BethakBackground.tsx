@@ -157,16 +157,17 @@ export function BethakBackground({ mood = DEFAULT_MOOD }: { mood?: MoodId }) {
     const reduced = prefersReducedMotion();
     const coverMs = reduced ? 120 : 300;
     setVeiled(true);
-    let lift = 0;
-    const swap = window.setTimeout(() => {
-      setShown(mood);
-      lift = window.setTimeout(() => setVeiled(false), reduced ? 60 : 140);
-    }, coverMs);
-    return () => {
-      window.clearTimeout(swap);
-      window.clearTimeout(lift);
-    };
+    const swap = window.setTimeout(() => setShown(mood), coverMs);
+    return () => window.clearTimeout(swap);
   }, [mood, shown]);
+
+  // New scene is mounted and running underneath: lift the darkness away.
+  useEffect(() => {
+    if (!veiled || mood !== shown) return;
+    const reduced = prefersReducedMotion();
+    const id = window.setTimeout(() => setVeiled(false), reduced ? 60 : 160);
+    return () => window.clearTimeout(id);
+  }, [veiled, mood, shown]);
 
   return (
     <div className="absolute inset-0 -z-10 overflow-hidden">
