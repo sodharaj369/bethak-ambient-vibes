@@ -111,6 +111,8 @@ export class YouTubeEngine implements MusicEngine {
    * data, never permission.
    */
   private entered = false;
+  /** Invalidates in-flight volume fades when playback is suspended. */
+  private fadeToken = 0;
 
 
   constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
@@ -182,9 +184,31 @@ export class YouTubeEngine implements MusicEngine {
     this.emit();
   }
 
+  /**
+   * The tab went to the background: pause hard and cancel any pending intent
+   * to play, so neither a ready event, a remount nor a returning pageshow can
+   * resume the ghazal on its own. The sitting (track + position) is kept.
+   */
+  suspend() {
+    this.wantPlay = false;
+    this.playing = false;
+    // Any fade-in still in flight would keep calling play(): the gate below
+    // makes those calls inert until the visitor asks again.
+    this.fadeToken += 1;
+    try {
+      this.player?.pauseVideo();
+    } catch {
+      /* player not addressable */
+    }
+    this.emit();
+  }
+
+
+
   /** Enter the room: start playing with the volume rising gently from silence. */
   async fadeIn(durationMs = 700, target = 100) {
     if (!this.entered) return;
+    const token = (this.fadeToken += 1);
     const steps = 14;
     try {
       this.player?.setVolume(0);
@@ -195,6 +219,7 @@ export class YouTubeEngine implements MusicEngine {
     for (let i = 1; i <= steps; i += 1) {
       // eslint-disable-next-line no-await-in-loop
       await new Promise((r) => setTimeout(r, durationMs / steps));
+      if (token !== this.fadeToken) return;
       const eased = Math.pow(i / steps, 1.6) * target;
       try {
         this.player?.setVolume(Math.round(eased));

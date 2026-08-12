@@ -189,6 +189,16 @@ export class AmbienceEngine {
       }
     });
   }
+
+  /**
+   * The page went to the background: cut the room sound at once and disarm
+   * the engine, so nothing can start again by itself when the visitor
+   * returns — only an explicit gesture may call start() again.
+   */
+  suspend() {
+    this.stop();
+  }
+
 }
 
 let singleton: AmbienceEngine | null = null;

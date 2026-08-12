@@ -93,3 +93,24 @@ export function playHarmoniumNote() {
 
   playFromPool();
 }
+
+/** Page went to the background: silence any ringing note immediately. */
+export function stopHarmoniumNotes() {
+  try {
+    pool.forEach((a) => {
+      a.pause();
+      try {
+        a.currentTime = 0;
+      } catch {
+        /* ignore */
+      }
+    });
+  } catch {
+    /* ignore */
+  }
+  try {
+    if (ctx && ctx.state === "running") void ctx.suspend();
+  } catch {
+    /* ignore */
+  }
+}

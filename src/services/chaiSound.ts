@@ -26,3 +26,13 @@ export function playChaiSound() {
     /* missing file or blocked playback — stay quiet */
   }
 }
+
+/** Page went to the background: the clink must not survive it. */
+export function stopChaiSound() {
+  try {
+    el?.pause();
+    if (el) el.currentTime = 0;
+  } catch {
+    /* nothing playing */
+  }
+}

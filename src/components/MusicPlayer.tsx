@@ -3,6 +3,8 @@ import { getYouTubeEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist, type MusicTrack } from "@/data/playlist";
 import type { MoodId } from "@/data/scenes";
 import { getAmbienceEngine } from "@/services/ambienceEngine";
+import { stopChaiSound } from "@/services/chaiSound";
+import { stopHarmoniumNotes } from "@/services/harmoniumSound";
 import { PlaylistPanel } from "@/components/PlaylistPanel";
 import { isFresh, readSession, writeSession } from "@/lib/bethakSession";
 
@@ -136,26 +138,41 @@ export function MusicPlayer({
     ambience.setMood(mood);
   }, [ambience, mood]);
 
-  // Leaving the room: stop the ambience cleanly. Coming back from the browser's
-  // back/forward cache the visitor is still inside, so the gate is re-armed —
-  // silently: nothing resumes on its own, the controls simply work again.
+  // Leaving the room, or simply leaving the tab: everything in the bethak goes
+  // quiet at once — ghazal, room sound, chai, harmonium. Coming back the
+  // visitor finds the room exactly as silent as they left it; only their own
+  // gesture starts it again.
   useEffect(() => {
-    const stop = () => {
-      ambience.stop();
+    const silence = () => {
+      engine.suspend();
+      ambience.suspend();
+      stopChaiSound();
+      stopHarmoniumNotes();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") silence();
+    };
+    const onPageHide = () => {
+      silence();
       engine.leave();
     };
-    const restore = (e: PageTransitionEvent) => {
-      if (!e.persisted || !autoStart) return;
-      engine.markEntered();
-      ambience.start(mood);
+    const onPageShow = (e: PageTransitionEvent) => {
+      // Restored from the back/forward cache: the controls work again, but
+      // nothing sounds until the visitor asks.
+      if (e.persisted && autoStart) engine.markEntered();
     };
-    window.addEventListener("pagehide", stop);
-    window.addEventListener("pageshow", restore);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("beforeunload", silence);
+    window.addEventListener("pageshow", onPageShow);
     return () => {
-      window.removeEventListener("pagehide", stop);
-      window.removeEventListener("pageshow", restore);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("beforeunload", silence);
+      window.removeEventListener("pageshow", onPageShow);
     };
-  }, [ambience, engine, autoStart, mood]);
+  }, [ambience, engine, autoStart]);
+
 
 
   // Remember where we are, without ever interrupting playback.
@@ -284,7 +301,16 @@ export function MusicPlayer({
                 aria-label={state.isPlaying ? "Pause" : "Play"}
                 title={state.canPlay ? undefined : "Connecting to YouTube player…"}
                 aria-disabled={!state.canPlay}
-                onClick={() => (state.isPlaying ? engine.pause() : void engine.play())}
+                onClick={() => {
+                  if (state.isPlaying) {
+                    engine.pause();
+                    ambience.suspend();
+                    return;
+                  }
+                  // Explicit gesture: the room may breathe again.
+                  ambience.start(mood);
+                  void engine.play();
+                }}
               >
                 {state.isPlaying ? <PauseIcon /> : <PlayIcon />}
               </button>
