@@ -28,7 +28,8 @@ export function readAmbiencePref(): AmbiencePref {
     return {
       enabled: typeof p.enabled === "boolean" ? p.enabled : DEFAULT_PREF.enabled,
       volume:
-        typeof p.volume === "number" && p.volume >= 0 && p.volume <= 1
+        // Older visits stored a much quieter default; lift those to the new one.
+        typeof p.volume === "number" && p.volume > 0.4 && p.volume <= 1
           ? p.volume
           : DEFAULT_PREF.volume,
     };
