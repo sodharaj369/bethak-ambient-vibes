@@ -407,10 +407,11 @@
 }
 
 @utility track-title {
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   font-weight: 500;
   letter-spacing: 0.005em;
-  color: oklch(0.99 0.01 85);
+  color: oklch(0.99 0.01 85 / 0.96);
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -475,10 +476,11 @@
 @utility ctl {
   display: grid;
   place-items: center;
-  height: 30px;
-  width: 30px;
+  height: 27px;
+  width: 27px;
   border-radius: 9999px;
-  color: oklch(0.97 0.01 85 / 0.8);
+  color: oklch(0.97 0.01 85 / 0.72);
+
   transition:
     color 200ms ease,
     background 200ms ease;
