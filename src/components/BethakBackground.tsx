@@ -39,8 +39,8 @@ function SceneLayer({ moodId, active }: { moodId: MoodId; active: boolean }) {
       muted
       loop
       playsInline
-      // @ts-expect-error legacy iOS attribute
       webkit-playsinline="true"
+
       disablePictureInPicture
       controls={false}
       preload={moodId === DEFAULT_MOOD ? "auto" : "metadata"}

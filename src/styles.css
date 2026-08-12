@@ -848,3 +848,54 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* --- Ambient video scenes ------------------------------------------------ */
+@utility scene-video {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+  transition: opacity 1200ms ease;
+  will-change: opacity;
+  pointer-events: none;
+}
+
+/* --- Mood selector: four quiet words ------------------------------------- */
+@utility mood-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(22% + clamp(6.5rem, 19vw, 13rem));
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  @media (min-width: 768px) {
+    top: calc(16% + clamp(7rem, 15vw, 13rem));
+    gap: 20px;
+  }
+}
+
+@utility mood-word {
+  font-family: var(--font-devanagari);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  padding: 6px 4px;
+  color: oklch(0.97 0.02 85 / 0.42);
+  text-shadow: 0 1px 10px oklch(0.15 0.02 60 / 0.7);
+  transition: color 400ms ease, opacity 400ms ease;
+  &:hover {
+    color: oklch(0.98 0.02 85 / 0.75);
+  }
+  &:focus-visible {
+    outline: 2px solid oklch(0.88 0.1 78 / 0.8);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+}
+
+@utility mood-word-on {
+  color: oklch(0.9 0.11 78 / 0.95);
+}
