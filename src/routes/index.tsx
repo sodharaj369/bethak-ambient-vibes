@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BethakBackground } from "@/components/BethakBackground";
 import { BethakTitle } from "@/components/BethakTitle";
 import { TopBar } from "@/components/TopBar";
@@ -7,6 +7,8 @@ import { MusicPlayer } from "@/components/MusicPlayer";
 import { MoodSelector } from "@/components/MoodSelector";
 import { DEFAULT_MOOD, SCENES, type MoodId } from "@/data/scenes";
 import { EXTERNAL_LINKS } from "@/data/playlist";
+import { RoomControls } from "@/components/RoomControls";
+import { isMoodId, sessionTracks } from "@/data/sessions";
 import { readSession, writeSession } from "@/lib/bethakSession";
 
 const SITE_URL = "https://bethak-ambient-vibes.lovable.app";
@@ -55,12 +57,21 @@ const MOOD_KEY = "bethakMood";
 
 function Index() {
   const [mood, setMood] = useState<MoodId>(DEFAULT_MOOD);
+  const tracks = useMemo(() => sessionTracks(mood), [mood]);
   const [entered, setEntered] = useState(false);
   const [lifting, setLifting] = useState(false);
 
   // Restore the last chosen mood after hydration (keeps SSR markup stable).
   useEffect(() => {
     try {
+      // A shared link wins for this visit; persistence continues from there.
+      const shared = new URLSearchParams(window.location.search).get("mood");
+      if (isMoodId(shared)) {
+        setMood(shared);
+        window.localStorage.setItem(MOOD_KEY, shared);
+        writeSession({ mood: shared });
+        return;
+      }
       const saved = window.localStorage.getItem(MOOD_KEY) ?? readSession()?.mood;
       if (saved && SCENES.some((s) => s.id === saved)) setMood(saved as MoodId);
     } catch {
@@ -98,6 +109,7 @@ function Index() {
       <BethakBackground mood={mood} started={entered} />
       <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} aria-hidden={!showPlayer}>
         <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
+        <RoomControls mood={mood} />
       </div>
 
       <div className="title-slot">
@@ -109,7 +121,7 @@ function Index() {
       {/* Mounted from the start (invisible) so the audio engine is warm and
           the player can appear instantly on entry — never a loading state. */}
       <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} aria-hidden={!showPlayer}>
-        <MusicPlayer autoStart={entered} />
+        <MusicPlayer autoStart={entered} mood={mood} tracks={tracks} />
       </div>
 
       {!veilGone && (
