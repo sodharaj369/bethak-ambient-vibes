@@ -40,7 +40,15 @@ function prefersReducedMotion() {
  * No reverse playback, no black overlay, no camera transform — and the music
  * system is never touched.
  */
-function SceneLayer({ moodId, active }: { moodId: MoodId; active: boolean }) {
+function SceneLayer({
+  moodId,
+  active,
+  visible,
+}: {
+  moodId: MoodId;
+  active: boolean;
+  visible: boolean;
+}) {
   const scene = useMemo(() => SCENES.find((s) => s.id === moodId)!, [moodId]);
   const aRef = useRef<HTMLVideoElement>(null);
   const bRef = useRef<HTMLVideoElement>(null);
