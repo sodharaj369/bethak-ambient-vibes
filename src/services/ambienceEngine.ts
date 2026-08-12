@@ -176,6 +176,7 @@ export class AmbienceEngine {
 
   /** Leaving the room: stop cleanly. */
   stop() {
+    this.started = false;
     this.layers.forEach((layer) => {
       if (layer.fade) clearInterval(layer.fade);
       layer.fade = null;
