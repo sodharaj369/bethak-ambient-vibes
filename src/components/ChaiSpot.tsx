@@ -15,8 +15,8 @@ const LINE_MS = 2600;
  * the ghazal, the ambience and the video keep running exactly as they were.
  */
 export function ChaiSpot({ mood, enabled }: { mood: MoodId; enabled: boolean }) {
-  const scene = sceneById(mood);
-  const chai = scene.chai;
+  const scene = sceneById(mood)!;
+  const chai = scene?.chai;
   const [line, setLine] = useState<string | null>(null);
   const [visible, setVisible] = useState(false);
   const [sipped, setSipped] = useState(false);
