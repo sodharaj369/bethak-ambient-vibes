@@ -1097,3 +1097,11 @@
   opacity: 1;
   pointer-events: auto;
 }
+
+/* Warm darkness surrounding the room band on portrait phones, so the
+   letterboxed area reads as the unlit part of the bethak, not as empty UI. */
+@utility room-stage {
+  background:
+    radial-gradient(120% 80% at 50% 45%, oklch(0.22 0.04 60 / 0.9), oklch(0.12 0.03 55) 70%),
+    oklch(0.11 0.025 55);
+}
