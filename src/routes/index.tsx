@@ -101,7 +101,7 @@ function Index() {
       {!lifting && (
         <div className="enter-veil">
           <button type="button" className="enter-word font-devanagari" onClick={enterBethak}>
-            बैठक में आइए · Enter Bethak
+            बैठक में आइए
           </button>
         </div>
       )}
