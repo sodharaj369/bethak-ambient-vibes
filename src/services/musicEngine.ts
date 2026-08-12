@@ -101,6 +101,8 @@ export class YouTubeEngine implements MusicEngine {
   /** Playback sequence of playlist indices; identity unless shuffling. */
   private order: number[] = [];
   private cursor = 0;
+  /** Position to apply as soon as the loaded/cued video is addressable. */
+  private pendingSeek: number | null = null;
 
 
   constructor(hostId: string, tracks: MusicTrack[] = bethakPlaylist) {
