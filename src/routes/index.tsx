@@ -78,17 +78,24 @@ function Index() {
     }
   };
 
-  // Step in: the room starts moving, then the warm darkness slowly lifts.
+  // Step in: the room starts moving, then the warm darkness slowly lifts,
+  // and only once the room is fully there does the player settle in.
+  const [showPlayer, setShowPlayer] = useState(false);
   const enterBethak = () => {
     if (entered) return;
     setEntered(true);
     setLifting(true);
+    window.setTimeout(() => setShowPlayer(true), 1500);
   };
 
   return (
     <main className="bethak-screen">
       <BethakBackground mood={mood} started={entered} />
-      <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
+      {entered && (
+        <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`}>
+          <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
+        </div>
+      )}
 
       <div className="title-slot">
         <BethakTitle />
@@ -96,7 +103,11 @@ function Index() {
 
       <MoodSelector mood={mood} onChange={chooseMood} />
 
-      <MusicPlayer autoStart={entered} />
+      {entered && (
+        <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`}>
+          <MusicPlayer autoStart={entered} />
+        </div>
+      )}
 
       {!lifting && (
         <div className="enter-veil">
