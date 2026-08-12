@@ -182,11 +182,13 @@
   }
 }
 
+/* Camera is locked: no zoom, pan, or Ken Burns drift. The room only moves
+   because of the ambient video itself. */
 @utility room-breathe {
   position: absolute;
   inset: 0;
-  animation: bethak-breathe 34s ease-in-out infinite;
-  transform-origin: 60% 55%;
+  transform: none;
+  animation: none;
 }
 
 @utility ambience {
@@ -196,15 +198,6 @@
 }
 
 
-@keyframes bethak-breathe {
-  0%,
-  100% {
-    transform: scale(1.02);
-  }
-  50% {
-    transform: scale(1.055);
-  }
-}
 
 @utility lamp-glow {
   position: absolute;
