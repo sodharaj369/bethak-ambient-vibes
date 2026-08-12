@@ -155,7 +155,7 @@ function SceneLayer({
 
   return (
     <>
-      <video {...common} ref={aRef} style={fade(active && front === 0)} />
+      <video {...common} ref={aRef} style={fade(visible && (!active || front === 0))} />
       {active && !reduced && (
         <video {...common} ref={bRef} preload="auto" style={fade(front === 1)} />
       )}
@@ -216,7 +216,12 @@ export function BethakBackground({
       <div className="room-frame">
         <div className="room-breathe">
           {mounted.map((id) => (
-            <SceneLayer key={id} moodId={id} active={started && id === shown} />
+            <SceneLayer
+              key={id}
+              moodId={id}
+              active={started && id === shown}
+              visible={id === shown}
+            />
           ))}
         </div>
       </div>
