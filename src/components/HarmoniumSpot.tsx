@@ -39,8 +39,14 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
       }
     };
     read();
+    // Instant: the chai tap announces itself. The poll is only a safety net.
+    const onChai = () => setChaiFound(true);
+    window.addEventListener("bethak:chai-found", onChai);
     const id = window.setInterval(read, 2000);
-    return () => window.clearInterval(id);
+    return () => {
+      window.removeEventListener("bethak:chai-found", onChai);
+      window.clearInterval(id);
+    };
   }, []);
 
   const strike = useCallback(() => {
@@ -92,6 +98,9 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
             {enabled && chaiFound && !found && (
               <span className="chai-hint harmonium-hint" aria-hidden="true" />
             )}
+            {import.meta.env.DEV && (
+              <span className="hotspot-debug" data-label="HARMONIUM HOTSPOT" aria-hidden="true" />
+            )}
           </button>
           {line && (
             <span
@@ -103,6 +112,13 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
           )}
         </div>
       </div>
+      {import.meta.env.DEV && (
+        <div className="debug-panel">
+          <div>chai discovered: {chaiFound ? "YES" : "NO"}</div>
+          <div>harmonium discovered: {found ? "YES" : "NO"}</div>
+          <div>harmonium hotspot: {enabled && chaiFound && !found ? "ACTIVE" : "INACTIVE"}</div>
+        </div>
+      )}
     </div>
   );
 }
