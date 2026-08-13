@@ -12,6 +12,8 @@ import { EXTERNAL_LINKS } from "@/data/playlist";
 import { RoomControls } from "@/components/RoomControls";
 import { isMoodId, sessionTracks } from "@/data/sessions";
 import { readSession, writeSession } from "@/lib/bethakSession";
+import { readLightMode, writeLightMode, type LightMode } from "@/lib/roomLight";
+import { useRoomPan } from "@/hooks/useRoomPan";
 
 const SITE_URL = "https://bethak-ambient-vibes.lovable.app";
 const OG_IMAGE =
@@ -61,6 +63,9 @@ function Index() {
   const [mood, setMood] = useState<MoodId>(DEFAULT_MOOD);
   const tracks = useMemo(() => sessionTracks(mood), [mood]);
   const [entered, setEntered] = useState(false);
+  /** Visual only: the room's lighting, remembered between visits. */
+  const [lightMode, setLightMode] = useState<LightMode>("auto");
+  const pan = useRoomPan(mood);
   const [lifting, setLifting] = useState(false);
 
   // Restore the last chosen mood after hydration (keeps SSR markup stable).
@@ -80,6 +85,15 @@ function Index() {
       /* storage blocked — stay on the default */
     }
   }, []);
+
+  useEffect(() => {
+    setLightMode(readLightMode());
+  }, []);
+
+  const chooseLight = (m: LightMode) => {
+    setLightMode(m);
+    writeLightMode(m);
+  };
 
   const chooseMood = (id: MoodId) => {
     setMood(id);
@@ -107,14 +121,16 @@ function Index() {
   };
 
   return (
-    <main className="bethak-screen">
-      <BethakBackground mood={mood} started={entered} />
+    <main className="bethak-screen" style={pan.style} {...pan.handlers}>
+      <div ref={pan.stageRef} className="absolute inset-0">
+        <BethakBackground mood={mood} started={entered} lightMode={lightMode} />
+      </div>
       {/* One small secret: the chai reacts. Nothing else changes. */}
       {entered && <ChaiSpot mood={mood} enabled={showPlayer} />}
       {entered && <HarmoniumSpot mood={mood} enabled={showPlayer} />}
       <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} aria-hidden={!showPlayer}>
         <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
-        <RoomControls mood={mood} />
+        <RoomControls mood={mood} lightMode={lightMode} onLightModeChange={chooseLight} />
       </div>
 
       <div className="title-slot">
