@@ -58,9 +58,11 @@ export function useRoomPan(depKey?: unknown): RoomPan {
   const swallowClick = useRef(false);
   const raf = useRef<number | null>(null);
 
-  useEffect(() => {
-    panRef.current = pan;
-  }, [pan]);
+  /** Ref and state move together: `measure` must never see a stale pan. */
+  const applyPan = useCallback((v: number) => {
+    panRef.current = v;
+    setPan(v);
+  }, []);
 
   const measure = useCallback(() => {
     const viewW = window.innerWidth;
@@ -119,8 +121,8 @@ export function useRoomPan(depKey?: unknown): RoomPan {
 
   // Any range change immediately pulls the current position back inside it.
   useEffect(() => {
-    setPan((p) => clamp(p, range.min, range.max));
-  }, [range]);
+    applyPan(clamp(panRef.current, range.min, range.max));
+  }, [range, applyPan]);
 
   useEffect(
     () => () => {
@@ -142,7 +144,7 @@ export function useRoomPan(depKey?: unknown): RoomPan {
     const t0 = performance.now();
     const step = (now: number) => {
       const t = Math.min(1, (now - t0) / SETTLE_MS);
-      setPan(clamp(from + (to - from) * easeOutCubic(t), range.min, range.max));
+      applyPan(clamp(from + (to - from) * easeOutCubic(t), range.min, range.max));
       raf.current = t < 1 ? requestAnimationFrame(step) : null;
     };
     raf.current = requestAnimationFrame(step);
@@ -188,7 +190,7 @@ export function useRoomPan(depKey?: unknown): RoomPan {
     if (dt > 0) d.v = (e.clientX - d.last) / dt;
     d.last = e.clientX;
     d.t = now;
-    setPan(clamp(d.from + dx, range.min, range.max));
+    applyPan(clamp(d.from + dx, range.min, range.max));
   };
   const onPointerUp = (e: React.PointerEvent) => {
     const d = drag.current;
@@ -225,7 +227,7 @@ export function useRoomPan(depKey?: unknown): RoomPan {
     range,
     geom,
     portrait,
-    setPanTo: (v: number) => setPan(clamp(v, range.min, range.max)),
+    setPanTo: (v: number) => applyPan(clamp(v, range.min, range.max)),
     stopSettle,
   };
 }
