@@ -29,89 +29,87 @@ export const Route = createFileRoute("/pan-lab")({
 });
 
 /**
- * Mobile pan prototype. Nothing here is wired into the live room: the page
- * simply renders the existing scene and lets a finger slide the 16:9 frame
- * sideways inside its own overscan. This is a crop that moves — not 360°
- * video. Desktop keeps the production framing untouched.
+ * Mobile pan prototype. The scene is never re-framed: pan 0 is exactly the
+ * production V3 crop. The travel limits are derived purely from the rendered
+ * geometry of `.room-frame` (which already covers the viewport), so a frame
+ * edge can never enter the viewport at any pan position.
  */
-const PROD_LEFT = -350; // candidate production limit (drag toward the left side of the room)
-const PROD_RIGHT = 150; // candidate production limit
-const RESIST_ZONE = 90; // px before a limit where movement starts easing off
+const EDGE_GUARD = 1; // px kept in reserve at each side against sub-pixel rounding
 const SETTLE_MS = 420; // gentle inertial settling after release
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
-
-/**
- * Maps raw finger travel to frame travel: 1:1 through the middle, then a
- * progressively softer ratio inside the last RESIST_ZONE px, hard stop at the
- * limit. No rubber band — the frame never passes the clamp.
- */
-function resist(target: number, min: number, max: number) {
-  if (target > max - RESIST_ZONE) {
-    const zone = Math.min(RESIST_ZONE, max - min);
-    if (zone <= 0) return max;
-    const over = Math.min(target - (max - zone), zone * 3);
-    const t = Math.min(1, over / (zone * 3));
-    return max - zone + zone * easeOutCubic(t);
-  }
-  if (target < min + RESIST_ZONE) {
-    const zone = Math.min(RESIST_ZONE, max - min);
-    if (zone <= 0) return min;
-    const over = Math.min(min + zone - target, zone * 3);
-    const t = Math.min(1, over / (zone * 3));
-    return min + zone - zone * easeOutCubic(t);
-  }
-  return target;
-}
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
 function PanLab() {
   const [mood, setMood] = useState<MoodId>(DEFAULT_MOOD);
   const [pan, setPan] = useState(0);
-  // Available overscan, measured from the scene. The production candidate
-  // range is a tighter, asymmetric subset of this.
-  const [overscan, setOverscan] = useState({ min: 0, max: 0 });
+  /** Safe travel derived from the rendered frame; always contains 0. */
+  const [range, setRange] = useState({ min: 0, max: 0 });
+  const [geom, setGeom] = useState({ frameW: 0, viewW: 0, left: 0, right: 0 });
   const [portrait, setPortrait] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
+  const panRef = useRef(0);
   const drag = useRef<{ id: number; x: number; from: number; last: number; t: number; v: number } | null>(null);
   const raf = useRef<number | null>(null);
 
-  // Production candidate limits: never wider than the real overscan.
-  const range = useMemo(
-    () => ({
-      min: Math.max(overscan.min, PROD_LEFT),
-      max: Math.min(overscan.max, PROD_RIGHT),
-    }),
-    [overscan],
-  );
+  useEffect(() => {
+    panRef.current = pan;
+  }, [pan]);
 
-  // How far the frame may slide before an edge would enter the viewport.
+  /**
+   * Measure the frame as rendered right now, undo the pan currently applied to
+   * it, and turn the neutral rect into limits:
+   *   max pan (rightward) = how far the left edge is off-screen
+   *   min pan (leftward)  = how far the right edge is off-screen (negative)
+   */
   const measure = useCallback(() => {
-    const isPortrait = window.innerWidth < 768 && window.innerHeight >= window.innerWidth;
-    setPortrait(isPortrait);
+    const viewW = window.innerWidth;
+    setPortrait(viewW < 768 && window.innerHeight >= viewW);
     const frame = stage.current?.querySelector<HTMLElement>(".room-frame");
     if (!frame) return;
     const r = frame.getBoundingClientRect();
-    // Undo the current pan to get the neutral (default crop) rect.
-    const left = r.left - pan;
-    const right = r.right - pan;
-    const max = Math.max(0, Math.round(-left)); // slide right, reveal left side
-    const min = -Math.max(0, Math.round(right - window.innerWidth));
-    setOverscan({ min, max });
-  }, [pan]);
+    if (r.width === 0) return;
+    const p = panRef.current;
+    const left = r.left - p; // neutral (pan = 0) frame edges
+    const right = r.right - p;
 
+    const max = Math.max(0, Math.floor(-left) - EDGE_GUARD);
+    const min = Math.min(0, Math.ceil(viewW - right) + EDGE_GUARD);
+
+    setRange((prev) => (prev.min === min && prev.max === max ? prev : { min, max }));
+    setGeom({ frameW: Math.round(r.width), viewW, left: Math.round(r.left), right: Math.round(r.right) });
+  }, []);
+
+  // Re-measure on every geometry change: resize, orientation, mood swap, and
+  // whenever the frame element itself is re-laid out (video metadata, dvh
+  // changes from browser chrome collapsing, etc).
   useEffect(() => {
-    measure();
+    let frameEl: HTMLElement | null = null;
+    const ro = new ResizeObserver(() => measure());
+    const attach = () => {
+      const el = stage.current?.querySelector<HTMLElement>(".room-frame") ?? null;
+      if (el && el !== frameEl) {
+        if (frameEl) ro.unobserve(frameEl);
+        frameEl = el;
+        ro.observe(el);
+      }
+      measure();
+    };
+    attach();
+    const t = window.setInterval(attach, 500);
     window.addEventListener("resize", measure);
     window.addEventListener("orientationchange", measure);
     return () => {
+      window.clearInterval(t);
+      ro.disconnect();
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mood]);
+  }, [measure, mood]);
 
+  // Any range change immediately pulls the current position back inside it.
   useEffect(() => {
-    setPan((p) => Math.max(range.min, Math.min(range.max, p)));
+    setPan((p) => clamp(p, range.min, range.max));
   }, [range]);
 
   useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current); }, []);
@@ -125,13 +123,12 @@ function PanLab() {
 
   // Short eased glide toward the projected resting point. Settles, never bounces.
   const settle = (from: number, velocity: number) => {
-    const projected = from + velocity * 120; // px/ms * ms
-    const to = Math.max(range.min, Math.min(range.max, projected));
+    const to = clamp(from + velocity * 120, range.min, range.max);
     if (Math.abs(to - from) < 1) return;
     const t0 = performance.now();
     const step = (now: number) => {
       const t = Math.min(1, (now - t0) / SETTLE_MS);
-      setPan(from + (to - from) * easeOutCubic(t));
+      setPan(clamp(from + (to - from) * easeOutCubic(t), range.min, range.max));
       raf.current = t < 1 ? requestAnimationFrame(step) : null;
     };
     raf.current = requestAnimationFrame(step);
@@ -155,9 +152,9 @@ function PanLab() {
     if (dt > 0) d.v = (e.clientX - d.last) / dt;
     d.last = e.clientX;
     d.t = now;
-    // Vertical movement is ignored entirely; only dx counts.
-    const next = d.from + (e.clientX - d.x);
-    setPan(resist(next, range.min, range.max));
+    // Vertical movement is ignored entirely; only dx counts. Hard clamp: the
+    // frame never travels past a safe limit, so there is no rubber band.
+    setPan(clamp(d.from + (e.clientX - d.x), range.min, range.max));
   };
   const onUp = (e: React.PointerEvent) => {
     const d = drag.current;
@@ -166,13 +163,13 @@ function PanLab() {
     settle(pan, Math.max(-2, Math.min(2, d.v)));
   };
 
-
-  const pct = pan >= 0 ? (range.max ? Math.round((pan / range.max) * 100) : 0) : range.min ? -Math.round((pan / range.min) * 100) : 0;
   const vars = useMemo(
     () => ({ "--pan-x": `${pan}px`, touchAction: "pan-y" }) as React.CSSProperties,
     [pan],
   );
 
+  // Live cover check against the actual rendered rect (not the model).
+  const covered = geom.frameW > 0 && geom.left <= 0.5 && geom.right >= geom.viewW - 0.5;
 
   return (
     <main
@@ -198,6 +195,11 @@ function PanLab() {
 
       {import.meta.env.DEV && (
         <div
+          data-pan-debug
+          data-pan={Math.round(pan)}
+          data-min={range.min}
+          data-max={range.max}
+          data-safe={covered ? "1" : "0"}
           style={{
             position: "absolute",
             left: 12,
@@ -215,17 +217,19 @@ function PanLab() {
           }}
         >
           <div>
-            pan {pct}% ({Math.round(pan)}px) · prod L {range.min}px / R {range.max}px ·{" "}
-            available {overscan.min}…{overscan.max}px ·{" "}
-            {portrait ? "portrait: pan on" : "desktop/landscape: pan off"}
+            frame {geom.frameW}px · viewport {geom.viewW}px · pan {Math.round(pan)}px · safe{" "}
+            {range.min}…{range.max}px ·{" "}
+            <strong style={{ color: covered ? "oklch(0.85 0.13 150)" : "oklch(0.7 0.2 25)" }}>
+              {covered ? "SAFE" : "EDGE EXPOSED"}
+            </strong>{" "}
+            · {portrait ? "portrait: pan on" : "desktop/landscape: pan off"}
           </div>
           <input
             type="range"
             min={range.min || -1}
             max={range.max || 1}
             value={Math.round(pan)}
-
-            onChange={(e) => { stopSettle(); setPan(Number(e.target.value)); }}
+            onChange={(e) => { stopSettle(); setPan(clamp(Number(e.target.value), range.min, range.max)); }}
             style={{ width: "100%" }}
             aria-label="Pan position"
           />
