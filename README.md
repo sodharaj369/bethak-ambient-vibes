@@ -1,646 +1,203 @@
-# Bethak: A Digital Baithak
+# BETHAK
 
-Lovable prompt — BETHAK.WTF
+## A quiet place on the internet.
 
-Build a minimalist, immersive music website called BETHAK.
+BETHAK (बैठक) is an immersive listening experience inspired by the feeling of sitting in a
+traditional Indian bethak — a late-night sitting room with ghazals playing softly, chai on the
+table and the fan turning overhead. It combines curated ghazal sessions, cinematic room scenes,
+ambient sound layers and a few small interactive discoveries.
 
-The concept is a digital Indian baithak/bethak — a quiet, intimate late-night sitting room where people sit, drink chai and listen to ghazals and old Hindi music.
+It is not a streaming service, not a game and not an app with a dashboard. It is one room.
 
-I want the website to feel like a tiny place on the internet, not like a normal music streaming application.
+![BETHAK — the room](docs/images/bethak-preview.png)
 
-IMPORTANT DESIGN DIRECTION
+## Live
 
-I have provided a custom illustration of the Bethak room.
+[BETHAK — Open the room](https://bethak-ambient-vibes.lovable.app)
 
-Use that illustration as the primary full-screen background. Do NOT generate or replace the illustration.
+The production experience lives at `/`. Everything else in this repository is supporting code or
+a documented development prototype — do not treat other routes as the demo.
 
-The illustration shows:
+## Preview
 
- traditional Indian wooden diwan
+| Desktop | Mobile |
+| --- | --- |
+| ![Desktop](docs/images/bethak-preview.png) | ![Mobile](docs/images/bethak-mobile.png) |
 
- cushions
+Screenshots live in `docs/images/`. Two optional assets are not committed yet, and would be nice
+additions if you want to document those features visually:
 
- chai on a low table
+- `docs/images/bethak-pan.png` — mobile portrait mid-pan, showing the wider scene
+- `docs/images/bethak-candle.png` — the room with Candle lighting enabled
 
- harmonium
+Keep README assets as compressed images or short GIFs. Do not commit raw video for previews.
 
- warm table lamp
+## What makes BETHAK different?
 
- ceiling fan
+### 🎵 Ghazal listening
 
- open window with moonlit night
+Curated, mood-based listening sessions rather than an endless catalogue.
 
- old family photograph
+### 🌧️ Ambient sound
 
- books/newspaper
+An independent ambient layer per mood, with smooth crossfades and its own volume.
 
- warm nostalgic Indian home atmosphere
+### 🎬 Cinematic rooms
 
-The illustration should occupy the entire viewport.
+Four visual environments: **Raat**, **Baarish**, **Shaam**, **Yaadein**.
 
-Do NOT put the image inside a card.
+### ↔️ Mobile room exploration
 
-Do NOT add borders around it.
+On portrait mobile you can gently pan sideways across the wider cinematic scene; the pan is
+clamped geometrically so the video edges are never exposed.
 
-Do NOT create a conventional website header.
+### 🕯️ Room lighting
 
-The experience should feel similar in simplicity to a small experimental internet website such as Saloon.WTF: full-screen artwork + small UI + music player.
+Auto / Warm / Dim / Candle atmospheric lighting, rendered inside the room frame so it pans with
+the scene.
 
-1. PAGE STRUCTURE
+### 🫖 Chai Ki Chuski
 
-Create a single-page website.
+A subtle discoverable interaction on the chai — a ceramic clink and a quiet thought.
 
-There should be essentially only one screen.
+### 🎹 Harmonium
 
-Background
+A second hidden interaction, which opens once the chai has been found, playing a soft note.
 
-Use the provided Bethak illustration as:
+### 🔗 Shareable moods
 
-background-image: cover
+Mood-specific deep links, e.g. `/?mood=baarish`.
 
-It must always cover the viewport.
+### 💾 Session persistence
 
-On desktop:
+Remembers mood, track, position and preferences without ever violating browser audio rules.
 
- preserve the full composition as much as possible
+### 🔇 Audio lifecycle
 
- use background-size: cover
+Nothing plays before you enter the room, and everything stops when the tab goes to the
+background — with no autoplay on return.
 
- center the image
+## How it feels
 
-On mobile:
+BETHAK is intentionally not an infinite feed. You enter, you listen, you stay a while.
 
- use a dedicated mobile crop if I provide one later
+> Not something to scroll. Somewhere to sit.
 
- for now intelligently position the background so the important room elements remain visible
+## Built with
 
-Add a very subtle dark overlay, approximately 5–12%, only if necessary to improve text readability.
+- React 19 + TypeScript
+- TanStack Start / TanStack Router (file-based routing, SSR)
+- Vite
+- Tailwind CSS v4 with a hand-written atmospheric stylesheet (`src/styles.css`)
+- YouTube IFrame Player API — the actual music playback engine
+- HTML5 `<video>` for the room scenes, HTML5 `<audio>` for ambience and interaction sounds
+- `localStorage` for session and preference persistence
 
-Do not make the image noticeably darker.
+No backend, no database, no API keys.
 
-2. TITLE
+## Architecture
 
-Place the Hindi title:
+```text
+Visitor
+  ↓ enters the room (single user gesture unlocks all audio)
+Room / Scene  ──  Lighting layer  ──  Interaction hotspots
+  ↓
+Music engine   Ambience engine
+  ↓
+Persistence (localStorage)
+```
 
-बैठक
+### Music engine — `src/services/musicEngine.ts`
 
-This MUST be real HTML/SVG text, not generated inside the background image.
+Playback through the YouTube IFrame API, session/playlist state, shuffle and repeat, position
+tracking, and a cached snapshot consumed by the player via `useSyncExternalStore`.
 
-Use a beautiful Devanagari display font.
+### Ambience engine — `src/services/ambienceEngine.ts`
 
-The title should be:
+One ambience track per mood, crossfaded on mood change, with independent volume and persistence.
 
- white
+### Room / scene — `src/components/BethakBackground.tsx`, `src/data/scenes.ts`, `src/hooks/useRoomPan.ts`
 
- large
+Looping dual-video layers, per-mood responsive crop focal points, and the clamped mobile portrait
+pan.
 
- elegant
+### Interaction hotspots — `src/components/ChaiSpot.tsx`, `src/components/HarmoniumSpot.tsx`
 
- slightly artistic
+Invisible, discoverable hotspots with their own one-shot sounds (`src/services/chaiSound.ts`,
+`src/services/harmoniumSound.ts`).
 
- centered horizontally
+### Lighting — `src/components/RoomLight.tsx`, `src/lib/roomLight.ts`
 
- positioned around the upper-middle area
+Auto / Warm / Dim / Candle overlays rendered inside the room frame.
 
- visually integrated with the illustration
+### Persistence — `src/lib/bethakSession.ts`
 
-Do not use a generic modern sans-serif font.
+Mood, current track, playback position (24h TTL) and user preferences.
 
-Find an appropriate Devanagari font from Google Fonts if available, preferably something elegant and traditional.
+## Project structure
 
-The title should simply say:
-
-बैठक
-
-No subtitle underneath initially.
-
-3. TOP LEFT
-
-Show the current local time.
-
-Example:
-
-11:47 PM
-
-Requirements:
-
- automatically update every minute
-
- use 12-hour format
-
- white text
-
- small
-
- subtle
-
- no date
-
- no seconds
-
-Position:
-
-approximately 24px from the left and 24px from the top on desktop.
-
-On mobile:
-
-approximately 16px from the edges.
-
-4. TOP CENTER / ONLINE USERS
-
-Add a tiny status indicator similar to:
-
-🟢 27 online
-
-But don't make it look like a social network.
-
-It should be subtle.
-
-Use:
-
- tiny green circle
-
- random number between approximately 15–60
-
- white/cream text
-
-The number can change occasionally to simulate people currently sitting in the Bethak.
-
-For example:
-
-🟢 34 online
-
-Do NOT build actual accounts or real-time user tracking.
-
-This is only an atmospheric detail.
-
-5. TOP RIGHT
-
-Add two very subtle external music links:
-
-Spotify ↗
-
-YouTube Music ↗
-
-These should appear in white.
-
-They should be small and unobtrusive.
-
-For now, use placeholder URLs/constants that are easy for me to replace later.
-
-Do NOT open Spotify or YouTube inside an iframe unless explicitly required.
-
-Clicking them should open the relevant playlist in a new tab.
-
-Keep this area extremely minimal.
-
-6. MUSIC PLAYER
-
-This is the most important UI element.
-
-Create a floating pill-shaped music player at the bottom center, inspired by the general simplicity of Saloon.WTF but with its own visual identity.
-
-Do NOT copy the Saloon player exactly.
-
-The player should feel like it belongs to this Bethak room.
-
-Position
-
-Desktop:
-
- fixed
-
- bottom: approximately 28px
-
- centered horizontally
-
- width: approximately 620–680px
-
- height: approximately 90–110px
-
-Mobile:
-
- fixed
-
- bottom: approximately 16px
-
- width: calc(100% - 24px)
-
- height: approximately 85–95px
-
-7. PLAYER DESIGN
-
-Use:
-
- translucent dark warm-brown background
-
- approximately 75–85% opacity
-
- subtle backdrop blur
-
- very soft shadow
-
- large border radius
-
- no obvious border
-
- elegant minimal appearance
-
-Do NOT use Spotify's default embedded player design.
-
-The player should look custom.
-
-Player contents
-
-Left:
-
-Album artwork
-
-Approximately 64x64 desktop.
-
-Rounded circle or very subtle rounded square.
-
-Center:
-
-Song title
-
-Example:
-
-Hothon Se Chhu Lo Tum
-
-Below it:
-
-Jagjit Singh
-
-Below that:
-
-thin progress bar
-
-Right:
-
-Previous
-Play/Pause
-Next
-
-Use simple elegant icons.
-
-8. INITIAL PLAYLIST DATA
-
-For the first version, create a local JavaScript playlist object.
-
-Do NOT require Spotify API authentication for the initial UI.
-
-Example structure:
-
-const bethakPlaylist = [
-  {
-    title: "Hothon Se Chhu Lo Tum",
-    artist: "Jagjit Singh",
-    artwork: "/music/hothon.jpg",
-    spotifyUrl: "",
-    youtubeUrl: ""
-  },
-  {
-    title: "Tum Ko Dekha To Yeh Khayal Aaya",
-    artist: "Jagjit Singh",
-    artwork: "/music/tumko.jpg",
-    spotifyUrl: "",
-    youtubeUrl: ""
-  }
-];
-
-Use placeholder artwork if actual artwork is not available.
-
-Make the playlist architecture easy to replace later.
-
-9. IMPORTANT MUSIC IMPLEMENTATION
-
-For the first version, do not download or host copyrighted Bollywood/Ghazal MP3 files.
-
-Build the player UI and playlist architecture first.
-
-The music playback layer should be abstracted so that I can later connect it to an authorized provider such as Spotify or YouTube.
-
-Create a clean interface/service such as:
-
-MusicProvider
- ├── play()
- ├── pause()
- ├── next()
- ├── previous()
- ├── seek()
- └── getCurrentTrack()
-
-For now, use a mock/demo playback state if actual streaming credentials are unavailable.
-
-Do not make the whole website dependent on an API key.
-
-10. PLAY / PAUSE BEHAVIOR
-
-When the user clicks Play:
-
- change icon to Pause
-
- animate the progress bar
-
- update elapsed time
-
- show current track
-
-When Pause:
-
- stop progress
-
- retain current position
-
-Next:
-
- move to next track
-
-Previous:
-
- previous track
-
-If the song has been playing for more than approximately 3 seconds, Previous should restart the current song; otherwise go to the previous track.
-
-Shuffle is NOT required.
-
-Volume control is NOT required initially.
-
-11. MOBILE EXPERIENCE
-
-This is extremely important.
-
-The site should feel like a mobile-first experience, because people will discover it through WhatsApp/Instagram/Reddit links.
-
-On a 390x844 phone:
-
-The entire room should still feel beautiful.
-
-Keep:
-
- time at top left
-
- online indicator near top
-
- music links top right
-
- large "बैठक"
-
- background illustration
-
- player at bottom
-
-Avoid scrolling.
-
-The page should be:
-
-100dvh
-overflow: hidden
-
-There should be no visible scrollbar.
-
-The music player must remain accessible without covering the most important part of the illustration.
-
-12. RESPONSIVENESS
-
-Desktop:
-
-Full-screen illustration
-        ↓
-   बैठक
-        ↓
- small top UI
-        ↓
- floating player
-
-Mobile:
-
-      time
-
-    बैठक
-
-
-   room / window
-   / harmonium
-
- floating player
-
-Use responsive CSS rather than creating a completely different application.
-
-13. ANIMATION
-
-Keep animations extremely subtle.
-
-Allowed:
-
- slow background breathing/ambient movement if practical
-
- tiny lamp glow
-
- very subtle curtain movement
-
- very subtle ceiling fan movement
-
- player progress animation
-
- fade transitions when song changes
-
-Do NOT animate the entire illustration.
-
-Do NOT add particles.
-
-Do NOT add flashy gradients.
-
-Do NOT add excessive hover effects.
-
-The website should feel calm.
-
-14. ATMOSPHERE
-
-The emotional target is:
-
-11:30 PM in an old Indian home.
-
-Someone has made chai.
-
-Someone is sitting on the diwan.
-
-A ghazal is playing.
-
-The rest of the house is quiet.
-
-The visitor should feel:
-
- warm
-
- nostalgic
-
- peaceful
-
- slightly melancholic
-
- intimate
-
-Avoid making it:
-
- luxurious
-
- royal
-
- palace-like
-
- overly traditional
-
- overly colorful
-
- religious
-
- kitschy
-
- modern SaaS-like
-
-15. TYPOGRAPHY
-
-Primary title:
-
-बैठक
-
-Use an elegant Devanagari font.
-
-UI text:
-
-Use a clean modern font such as Inter or a similar highly readable font.
-
-The contrast between the traditional Hindi title and modern tiny UI is intentional.
-
-16. NO NORMAL WEBSITE FEATURES
-
-Do NOT add:
-
- navbar
-
- About section
-
- footer
-
- login
-
- signup
-
- user profiles
-
- comments
-
- search
-
- recommendation engine
-
- playlist creation
-
- dashboard
-
- cards
-
- pricing
-
- analytics UI
-
- social feed
-
- chat
-
- unnecessary buttons
-
-This is intentionally a one-screen experimental website.
-
-17. DESKTOP BEHAVIOR
-
-The browser viewport should be completely filled.
-
-No scrolling.
-
-No white margins.
-
-No body background visible around the illustration.
-
-The website should look like a fullscreen digital artwork.
-
-18. ACCESSIBILITY
-
-Add:
-
- proper button labels
-
- keyboard accessibility for player controls
-
- sufficient contrast
-
- alt text for meaningful imagery
-
-But don't let accessibility features visually clutter the experience.
-
-19. CODE QUALITY
-
-Use a simple maintainable structure.
-
-Suggested:
-
+```text
 src/
-  components/
-    BethakBackground
-    BethakTitle
-    TopBar
-    MusicPlayer
-  data/
-    playlist.js
-  services/
-    musicProvider.js
-  App.jsx
+  components/     room, player, controls, hotspots (ui/ holds unused shadcn primitives)
+  routes/         index.tsx (the room), bethak.tsx (mood redirect), pan-lab.tsx (prototype)
+  services/       music, ambience, chai and harmonium audio engines
+  data/           playlist, mood scenes, curated sessions, chai lines
+  hooks/          useRoomPan — mobile pan geometry
+  lib/            session + lighting persistence helpers
+  styles.css      the whole visual system
+public/
+  scenes/         mood videos and their poster frames
+  ambience/       ambient and interaction audio
+docs/images/      README screenshots
+```
 
-Keep the implementation simple.
+### Editing the playlist
 
-Do not introduce unnecessary dependencies.
+`src/data/bethakPlaylist.ts` is the single editable list: `{ id, title, artist, youtubeId }`.
+Artwork is derived automatically from the YouTube thumbnail — never hardcode it.
 
-20. MOST IMPORTANT CREATIVE RULE
+### `/pan-lab` — development prototype
 
-Do not turn BETHAK into a music streaming application.
+`src/routes/pan-lab.tsx` is an **experimental development prototype**, kept as a documented
+example of how the mobile pan geometry was tuned. It is `noindex`, its debug readout only renders
+in dev builds, and it does not affect the production route `/`.
 
-It is an atmospheric internet experience.
+## Getting started
 
-The illustration is the room.
-
-The music is what makes the room alive.
-
-The UI should almost disappear.
-
-When someone opens it, their first reaction should be:
-
-“Oh… this is beautiful.”
-
-Then the song starts and the reaction should be:
-
-“This song belongs here.”
-
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://bethak-ambient-vibes.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/6701c47f-b796-4d87-b4ab-aa45a2a7709d).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
+```bash
+git clone <repository-url>
 cd <repository-name>
-npm i
+npm install
 npm run dev
 ```
+
+The dev server prints a local URL. No environment variables or credentials are required to run
+BETHAK locally.
+
+### Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the Vite dev server |
+| `npm run build` | Production build |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier |
+
+Bun works too (`bun install`, `bun run dev`); the GitHub Pages workflow uses Bun.
+
+## Deployment
+
+- **Lovable** — the live URL above.
+- **GitHub Pages** — `.github/workflows/deploy.yml` builds a static SPA on push to `main`. The
+  Vite `base` path is derived from `GITHUB_REPOSITORY`, so nothing is hardcoded.
+
+## Content note
+
+BETHAK does not host or distribute music. Playback is delegated to the official YouTube IFrame
+Player API, and each track links back to its source on YouTube. Ambient and interaction sounds are
+generated for this project. The room illustrations and videos belong to the project author.
+
+---
+
+Built with [Lovable](https://lovable.dev).
