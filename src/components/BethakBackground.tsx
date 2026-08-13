@@ -219,10 +219,13 @@ function SceneLayer({
 export function BethakBackground({
   mood = DEFAULT_MOOD,
   started = true,
+  lightMode = "auto",
 }: {
   mood?: MoodId;
   /** The ambient video only runs once the visitor has entered the room. */
   started?: boolean;
+  /** Atmospheric lighting of the room (visual only). */
+  lightMode?: LightMode;
 }) {
 
   // Start on the approved look, then settle into the real hour after mount
