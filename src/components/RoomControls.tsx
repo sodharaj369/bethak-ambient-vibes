@@ -66,6 +66,7 @@ export function RoomControls({
         type="button"
         className={`room-word${pref.enabled ? " room-word-on" : ""}`}
         aria-pressed={pref.enabled}
+        aria-label="Ambient room sound"
         title={pref.enabled ? "Ambience on" : "Ambience off"}
         onClick={() => engine.setEnabled(!pref.enabled)}
       >
@@ -107,6 +108,7 @@ export function RoomControls({
       <button
         type="button"
         className="room-word room-word-share"
+        aria-label="Share this bethak"
         title="Share this bethak"
         onClick={() => void share()}
       >

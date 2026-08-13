@@ -92,7 +92,7 @@ export function ChaiSpot({ mood, enabled }: { mood: MoodId; enabled: boolean }) 
           <button
             type="button"
             className="chai-hit"
-            aria-label="Chai Ki Chuski"
+            aria-label="Chai ki chuski — take a sip of the chai"
             tabIndex={enabled ? 0 : -1}
             onClick={sip}
           >
