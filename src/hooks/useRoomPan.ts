@@ -61,7 +61,15 @@ export function useRoomPan(depKey?: unknown): RoomPan {
   /** Ref and state move together: `measure` must never see a stale pan. */
   const applyPan = useCallback((v: number) => {
     panRef.current = v;
-    setPan(v);
+    setPan((previous) => {
+      if (import.meta.env.DEV && previous !== v) {
+        const target = window as Window & { __bethakPanTrace?: unknown[] };
+        const trace = (target.__bethakPanTrace ??= []);
+        trace.push({ at: performance.now(), source: "applyPan", previous, next: v });
+        if (trace.length > 500) trace.shift();
+      }
+      return v;
+    });
   }, []);
 
   const measure = useCallback(() => {
@@ -82,21 +90,36 @@ export function useRoomPan(depKey?: unknown): RoomPan {
     const max = Math.max(0, Math.floor(-left) - EDGE_GUARD);
     const min = Math.min(0, Math.ceil(viewW - right) + EDGE_GUARD);
 
-    setRange((prev) => (prev.min === min && prev.max === max ? prev : { min, max }));
+    setRange((prev) => {
+      if (prev.min === min && prev.max === max) return prev;
+      if (import.meta.env.DEV) {
+        const target = window as Window & { __bethakPanTrace?: unknown[] };
+        const trace = (target.__bethakPanTrace ??= []);
+        trace.push({ at: performance.now(), source: "range", previous: prev, next: { min, max } });
+        if (trace.length > 500) trace.shift();
+      }
+      return { min, max };
+    });
     const next = {
       frameW: Math.round(r.width),
       viewW,
       left: Math.round(r.left),
       right: Math.round(r.right),
     };
-    setGeom((prev) =>
-      prev.frameW === next.frameW &&
+    setGeom((prev) => {
+      if (prev.frameW === next.frameW &&
       prev.viewW === next.viewW &&
       prev.left === next.left &&
       prev.right === next.right
-        ? prev
-        : next,
-    );
+      ) return prev;
+      if (import.meta.env.DEV) {
+        const target = window as Window & { __bethakPanTrace?: unknown[] };
+        const trace = (target.__bethakPanTrace ??= []);
+        trace.push({ at: performance.now(), source: "geom", previous: prev, next });
+        if (trace.length > 500) trace.shift();
+      }
+      return next;
+    });
   }, []);
 
   useEffect(() => {

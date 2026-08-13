@@ -343,6 +343,30 @@ export class YouTubeEngine implements MusicEngine {
     const s = this.refresh();
     if (s === this.emitted) return;
     this.emitted = s;
+    if (import.meta.env.DEV) {
+      const target = window as Window & {
+        __bethakEngineTrace?: Array<{
+          at: number;
+          index: number;
+          playing: boolean;
+          position: number;
+          duration: number;
+          listeners: number;
+          stack: string;
+        }>;
+      };
+      const trace = (target.__bethakEngineTrace ??= []);
+      trace.push({
+        at: performance.now(),
+        index: s.index,
+        playing: s.isPlaying,
+        position: s.position,
+        duration: s.duration,
+        listeners: this.listeners.size,
+        stack: new Error().stack ?? "",
+      });
+      if (trace.length > 500) trace.shift();
+    }
     this.listeners.forEach((l) => l(s));
   }
 
