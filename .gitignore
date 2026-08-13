@@ -30,3 +30,23 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editors / OS
+*.iml
+Thumbs.db
+Desktop.ini
+
+# Temporary / debug output
+tmp/
+temp/
+*.tmp
+debug.log
+coverage/
+.playwright/
+test-results/
+playwright-report/
