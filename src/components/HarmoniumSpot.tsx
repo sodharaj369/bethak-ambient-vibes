@@ -112,7 +112,7 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
           <button
             type="button"
             className="chai-hit"
-            aria-label="Harmonium"
+            aria-label="Harmonium — play a soft note"
             tabIndex={enabled ? 0 : -1}
             onClick={strike}
           >
