@@ -140,6 +140,11 @@ function PanLab() {
   const onDown = (e: React.PointerEvent) => {
     if (!portrait || span === 0) return;
     stopSettle();
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {
+      /* capture unavailable */
+    }
     drag.current = { id: e.pointerId, x: e.clientX, from: pan, last: e.clientX, t: performance.now(), v: 0 };
   };
   const onMove = (e: React.PointerEvent) => {
@@ -161,8 +166,12 @@ function PanLab() {
     settle(pan, Math.max(-2, Math.min(2, d.v)));
   };
 
+
   const pct = pan >= 0 ? (range.max ? Math.round((pan / range.max) * 100) : 0) : range.min ? -Math.round((pan / range.min) * 100) : 0;
-  const vars = useMemo(() => ({ "--pan-x": `${pan}px` }) as React.CSSProperties, [pan]);
+  const vars = useMemo(
+    () => ({ "--pan-x": `${pan}px`, touchAction: "pan-y" }) as React.CSSProperties,
+    [pan],
+  );
 
 
   return (
@@ -173,11 +182,12 @@ function PanLab() {
       onPointerMove={onMove}
       onPointerUp={onUp}
       onPointerCancel={onUp}
-      
+      onLostPointerCapture={onUp}
     >
-      <div ref={stage} className="absolute inset-0" style={{ touchAction: "pan-y" }}>
+      <div ref={stage} className="absolute inset-0">
         <BethakBackground mood={mood} started />
       </div>
+
       <ChaiSpot mood={mood} enabled />
       <HarmoniumSpot mood={mood} enabled />
 
