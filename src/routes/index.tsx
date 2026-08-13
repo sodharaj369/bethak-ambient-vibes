@@ -128,20 +128,24 @@ function Index() {
       {/* One small secret: the chai reacts. Nothing else changes. */}
       {entered && <ChaiSpot mood={mood} enabled={showPlayer} />}
       {entered && <HarmoniumSpot mood={mood} enabled={showPlayer} />}
-      <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} aria-hidden={!showPlayer}>
+      <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} inert={!showPlayer}>
         <TopBar spotifyUrl={EXTERNAL_LINKS.spotify} youtubeUrl={EXTERNAL_LINKS.youtubeMusic} />
         <RoomControls mood={mood} lightMode={lightMode} onLightModeChange={chooseLight} />
       </div>
 
-      <div className="title-slot">
-        <BethakTitle />
-      </div>
+      {/* Behind the veil these are invisible: nothing there should be
+          reachable by keyboard or read out before the room is entered. */}
+      <div inert={!showPlayer}>
+        <div className="title-slot">
+          <BethakTitle />
+        </div>
 
-      <MoodSelector mood={mood} onChange={chooseMood} />
+        <MoodSelector mood={mood} onChange={chooseMood} />
+      </div>
 
       {/* Mounted from the start (invisible) so the audio engine is warm and
           the player can appear instantly on entry — never a loading state. */}
-      <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} aria-hidden={!showPlayer}>
+      <div className={`ui-reveal ${showPlayer ? "ui-reveal-on" : ""}`} inert={!showPlayer}>
         <MusicPlayer autoStart={entered} mood={mood} tracks={tracks} />
       </div>
 
