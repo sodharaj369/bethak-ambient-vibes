@@ -33,6 +33,12 @@ export type Scene = {
     h: string;
     mobile?: { x?: string; y?: string; w: string; h: string };
   };
+  /**
+   * The lamp / candle inside the 16:9 frame — where the room's warm light
+   * lives. Used by the atmospheric light layer, which sits inside the same
+   * room frame and therefore pans with the room.
+   */
+  light?: { x: string; y: string; mobile?: { x?: string; y?: string } };
   /** The harmonium, in the same frame-relative coordinates as `chai`. */
   harmonium?: {
     x: string;
@@ -48,6 +54,7 @@ export const SCENES: Scene[] = [
   // it, so the portrait focal point sits between them and leans window-ward.
   {
     id: "raat",
+    light: { x: "85%", y: "44%" },
     label: "रात",
     name: "Raat Ki Bethak",
     file: "Default_theme",
@@ -57,6 +64,7 @@ export const SCENES: Scene[] = [
   },
   {
     id: "baarish",
+    light: { x: "85%", y: "45%" },
     label: "बारिश",
     name: "Baarish Ki Bethak",
     file: "rainly_scene",
@@ -66,6 +74,7 @@ export const SCENES: Scene[] = [
   },
   {
     id: "shaam",
+    light: { x: "68%", y: "40%" },
     label: "शाम",
     name: "Shaam Ki Bethak",
     file: "sunset_scene",
@@ -75,6 +84,7 @@ export const SCENES: Scene[] = [
   },
   {
     id: "yaadein",
+    light: { x: "85%", y: "44%" },
     label: "यादें",
     name: "Yaadon Ki Bethak",
     file: "ideal_1",
