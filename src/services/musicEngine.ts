@@ -93,7 +93,12 @@ export class YouTubeEngine implements MusicEngine {
   private playing = false;
   private wantPlay = false;
   private listeners = new Set<(s: PlayerState) => void>();
+  /** Last handed-out state object; reused while nothing actually changed. */
+  private snapshot: PlayerState | null = null;
+  /** Last state pushed to listeners, so no-op ticks stay silent. */
+  private emitted: PlayerState | null = null;
   private ticker: ReturnType<typeof setInterval> | null = null;
+
   /** True between loading a track and the player reporting the new one. */
   private settling = false;
   private errorStreak = 0;
@@ -292,8 +297,19 @@ export class YouTubeEngine implements MusicEngine {
     return Number.isFinite(d) ? d : 0;
   }
 
+  /**
+   * The snapshot React reads. It is a pure getter: it never polls the YouTube
+   * player, so calling it twice in the same render always returns the very same
+   * object. Only `refresh()` — driven by the ticker and by real player events —
+   * may produce a new one.
+   */
   getState(): PlayerState {
-    return {
+    return this.snapshot ?? this.refresh();
+  }
+
+  /** Re-reads the live player and swaps the snapshot only if it truly moved. */
+  private refresh(): PlayerState {
+    const next: PlayerState = {
       index: this.index,
       track: this.getCurrentTrack(),
       isPlaying: this.playing,
@@ -303,20 +319,42 @@ export class YouTubeEngine implements MusicEngine {
       shuffle: this.shuffle,
       repeatMode: this.repeatMode,
     };
+    const prev = this.snapshot;
+    if (
+      prev &&
+      prev.index === next.index &&
+      prev.track === next.track &&
+      prev.isPlaying === next.isPlaying &&
+      // A quarter second is what the progress bar can show; finer float
+      // jitter must not become a React update.
+      Math.abs(prev.position - next.position) < 0.2 &&
+      Math.abs(prev.duration - next.duration) < 0.2 &&
+      prev.canPlay === next.canPlay &&
+      prev.shuffle === next.shuffle &&
+      prev.repeatMode === next.repeatMode
+    ) {
+      return prev;
+    }
+    this.snapshot = next;
+    return next;
   }
 
   private emit() {
-    const s = this.getState();
+    const s = this.refresh();
+    if (s === this.emitted) return;
+    this.emitted = s;
     this.listeners.forEach((l) => l(s));
   }
 
+
+  /** Subscription for useSyncExternalStore: the store is read, never pushed. */
   subscribe(listener: (s: PlayerState) => void) {
     this.listeners.add(listener);
-    listener(this.getState());
     return () => {
       this.listeners.delete(listener);
     };
   }
+
 
   async play() {
     if (!this.entered) return;
