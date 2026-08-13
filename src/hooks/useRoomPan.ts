@@ -26,6 +26,7 @@ export type RoomPan = {
     onPointerUp: (e: React.PointerEvent) => void;
     onPointerCancel: (e: React.PointerEvent) => void;
     onLostPointerCapture: (e: React.PointerEvent) => void;
+    onClickCapture: (e: React.MouseEvent) => void;
   };
   pan: number;
   range: { min: number; max: number };
@@ -42,7 +43,19 @@ export function useRoomPan(depKey?: unknown): RoomPan {
   const [portrait, setPortrait] = useState(false);
   const stageRef = useRef<HTMLDivElement | null>(null);
   const panRef = useRef(0);
-  const drag = useRef<{ id: number; x: number; from: number; last: number; t: number; v: number } | null>(null);
+  const drag = useRef<{
+    id: number;
+    x: number;
+    y: number;
+    from: number;
+    last: number;
+    t: number;
+    v: number;
+    /** A drag only takes over once the finger has clearly moved sideways. */
+    active: boolean;
+  } | null>(null);
+  /** Set after a real drag so the release does not also press a button. */
+  const swallowClick = useRef(false);
   const raf = useRef<number | null>(null);
 
   useEffect(() => {
@@ -125,28 +138,58 @@ export function useRoomPan(depKey?: unknown): RoomPan {
   const onPointerDown = (e: React.PointerEvent) => {
     if (!portrait || span === 0) return;
     stopSettle();
-    try {
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    } catch {
-      /* capture unavailable */
-    }
-    drag.current = { id: e.pointerId, x: e.clientX, from: pan, last: e.clientX, t: performance.now(), v: 0 };
+    // No pointer capture yet: taps on the chai, the player and every button
+    // must keep working. Capture happens only once a sideways drag begins.
+    drag.current = {
+      id: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      from: pan,
+      last: e.clientX,
+      t: performance.now(),
+      v: 0,
+      active: false,
+    };
   };
   const onPointerMove = (e: React.PointerEvent) => {
     const d = drag.current;
     if (!d || d.id !== e.pointerId) return;
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!d.active) {
+      // Vertical intent wins: leave the gesture to the page.
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+        drag.current = null;
+        return;
+      }
+      if (Math.abs(dx) < 8) return;
+      d.active = true;
+      try {
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      } catch {
+        /* capture unavailable */
+      }
+    }
     const now = performance.now();
     const dt = now - d.t;
     if (dt > 0) d.v = (e.clientX - d.last) / dt;
     d.last = e.clientX;
     d.t = now;
-    setPan(clamp(d.from + (e.clientX - d.x), range.min, range.max));
+    setPan(clamp(d.from + dx, range.min, range.max));
   };
   const onPointerUp = (e: React.PointerEvent) => {
     const d = drag.current;
     if (d?.id !== e.pointerId) return;
     drag.current = null;
+    if (!d.active) return;
+    swallowClick.current = true;
     settle(pan, Math.max(-2, Math.min(2, d.v)));
+  };
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (!swallowClick.current) return;
+    swallowClick.current = false;
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const style = useMemo(
@@ -163,6 +206,7 @@ export function useRoomPan(depKey?: unknown): RoomPan {
       onPointerUp,
       onPointerCancel: onPointerUp,
       onLostPointerCapture: onPointerUp,
+      onClickCapture,
     },
     pan,
     range,
