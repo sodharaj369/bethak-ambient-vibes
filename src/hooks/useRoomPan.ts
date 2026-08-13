@@ -61,15 +61,7 @@ export function useRoomPan(depKey?: unknown): RoomPan {
   /** Ref and state move together: `measure` must never see a stale pan. */
   const applyPan = useCallback((v: number) => {
     panRef.current = v;
-    setPan((previous) => {
-      if (import.meta.env.DEV && previous !== v) {
-        const target = window as Window & { __bethakPanTrace?: unknown[] };
-        const trace = (target.__bethakPanTrace ??= []);
-        trace.push({ at: performance.now(), source: "applyPan", previous, next: v });
-        if (trace.length > 500) trace.shift();
-      }
-      return v;
-    });
+    setPan(v);
   }, []);
 
   const measure = useCallback(() => {
@@ -90,57 +82,35 @@ export function useRoomPan(depKey?: unknown): RoomPan {
     const max = Math.max(0, Math.floor(-left) - EDGE_GUARD);
     const min = Math.min(0, Math.ceil(viewW - right) + EDGE_GUARD);
 
-    setRange((prev) => {
-      if (prev.min === min && prev.max === max) return prev;
-      if (import.meta.env.DEV) {
-        const target = window as Window & { __bethakPanTrace?: unknown[] };
-        const trace = (target.__bethakPanTrace ??= []);
-        trace.push({ at: performance.now(), source: "range", previous: prev, next: { min, max } });
-        if (trace.length > 500) trace.shift();
-      }
-      return { min, max };
-    });
+    setRange((prev) => (prev.min === min && prev.max === max ? prev : { min, max }));
     const next = {
       frameW: Math.round(r.width),
       viewW,
       left: Math.round(r.left),
       right: Math.round(r.right),
     };
-    setGeom((prev) => {
-      if (prev.frameW === next.frameW &&
+    setGeom((prev) =>
+      prev.frameW === next.frameW &&
       prev.viewW === next.viewW &&
       prev.left === next.left &&
       prev.right === next.right
-      ) return prev;
-      if (import.meta.env.DEV) {
-        const target = window as Window & { __bethakPanTrace?: unknown[] };
-        const trace = (target.__bethakPanTrace ??= []);
-        trace.push({ at: performance.now(), source: "geom", previous: prev, next });
-        if (trace.length > 500) trace.shift();
-      }
-      return next;
-    });
+        ? prev
+        : next,
+    );
   }, []);
 
   useEffect(() => {
-    let frameEl: HTMLElement | null = null;
-    const ro = new ResizeObserver(() => measure());
-    const attach = () => {
-      const el = stageRef.current?.querySelector<HTMLElement>(".room-frame") ?? null;
-      if (el && el !== frameEl) {
-        if (frameEl) ro.unobserve(frameEl);
-        frameEl = el;
-        ro.observe(el);
-      }
-      measure();
-    };
-    attach();
-    const t = window.setInterval(attach, 500);
+    // `.room-frame` is sized entirely from viewport units. Measuring it from a
+    // ResizeObserver created a feedback cycle during the entrance transition:
+    // observer callbacks queued geometry state faster than React could commit,
+    // so every callback compared against the same uncommitted initial state.
+    // One post-layout read plus actual viewport changes covers every legitimate
+    // geometry change without observing the transformed frame itself.
+    const initialMeasure = window.requestAnimationFrame(measure);
     window.addEventListener("resize", measure);
     window.addEventListener("orientationchange", measure);
     return () => {
-      window.clearInterval(t);
-      ro.disconnect();
+      window.cancelAnimationFrame(initialMeasure);
       window.removeEventListener("resize", measure);
       window.removeEventListener("orientationchange", measure);
     };
