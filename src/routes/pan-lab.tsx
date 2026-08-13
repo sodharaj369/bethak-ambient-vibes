@@ -140,6 +140,11 @@ function PanLab() {
   const onDown = (e: React.PointerEvent) => {
     if (!portrait || span === 0) return;
     stopSettle();
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {
+      /* capture unavailable */
+    }
     drag.current = { id: e.pointerId, x: e.clientX, from: pan, last: e.clientX, t: performance.now(), v: 0 };
   };
   const onMove = (e: React.PointerEvent) => {
@@ -160,6 +165,7 @@ function PanLab() {
     drag.current = null;
     settle(pan, Math.max(-2, Math.min(2, d.v)));
   };
+
 
   const pct = pan >= 0 ? (range.max ? Math.round((pan / range.max) * 100) : 0) : range.min ? -Math.round((pan / range.min) * 100) : 0;
   const vars = useMemo(() => ({ "--pan-x": `${pan}px` }) as React.CSSProperties, [pan]);
