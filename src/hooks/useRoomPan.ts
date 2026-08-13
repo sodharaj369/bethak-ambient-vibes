@@ -77,7 +77,20 @@ export function useRoomPan(depKey?: unknown): RoomPan {
     const min = Math.min(0, Math.ceil(viewW - right) + EDGE_GUARD);
 
     setRange((prev) => (prev.min === min && prev.max === max ? prev : { min, max }));
-    setGeom({ frameW: Math.round(r.width), viewW, left: Math.round(r.left), right: Math.round(r.right) });
+    const next = {
+      frameW: Math.round(r.width),
+      viewW,
+      left: Math.round(r.left),
+      right: Math.round(r.right),
+    };
+    setGeom((prev) =>
+      prev.frameW === next.frameW &&
+      prev.viewW === next.viewW &&
+      prev.left === next.left &&
+      prev.right === next.right
+        ? prev
+        : next,
+    );
   }, []);
 
   useEffect(() => {
