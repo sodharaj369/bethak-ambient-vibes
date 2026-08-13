@@ -2,15 +2,26 @@ import { useCallback, useEffect, useState } from "react";
 import type { MoodId } from "@/data/scenes";
 import { sessionFor } from "@/data/sessions";
 import { getAmbienceEngine } from "@/services/ambienceEngine";
+import { LIGHT_LABEL, nextLightMode, type LightMode } from "@/lib/roomLight";
 
 /**
  * Two very small objects in the room: the ambience switch and a way to pass
  * this bethak on. No panels, no toasts — just quiet words.
  */
-export function RoomControls({ mood }: { mood: MoodId }) {
+export function RoomControls({
+  mood,
+  lightMode,
+  onLightModeChange,
+}: {
+  mood: MoodId;
+  lightMode: LightMode;
+  onLightModeChange: (m: LightMode) => void;
+}) {
   const engine = getAmbienceEngine();
   const [pref, setPref] = useState(() => engine.getPref());
   const [copied, setCopied] = useState(false);
+  /** The light word is only said for a moment after a tap, then fades. */
+  const [said, setSaid] = useState(false);
 
   useEffect(() => engine.subscribe(setPref), [engine]);
 
@@ -19,6 +30,12 @@ export function RoomControls({ mood }: { mood: MoodId }) {
     const id = window.setTimeout(() => setCopied(false), 2200);
     return () => window.clearTimeout(id);
   }, [copied]);
+
+  useEffect(() => {
+    if (!said) return;
+    const id = window.setTimeout(() => setSaid(false), 1800);
+    return () => window.clearTimeout(id);
+  }, [said, lightMode]);
 
   const share = useCallback(async () => {
     const session = sessionFor(mood);
@@ -69,6 +86,23 @@ export function RoomControls({ mood }: { mood: MoodId }) {
           onChange={(e) => engine.setVolume(Number(e.target.value) / 100)}
         />
       )}
+        <button
+          type="button"
+          className="room-word room-word-light"
+          aria-label="Room light"
+          title={`Room light: ${LIGHT_LABEL[lightMode]}`}
+          onClick={() => {
+            onLightModeChange(nextLightMode(lightMode));
+            setSaid(true);
+          }}
+        >
+          <span className="room-word-mark" aria-hidden="true">
+            🕯
+          </span>
+          <span className={`room-word-label${said ? " room-word-said" : ""}`} role="status">
+            {LIGHT_LABEL[lightMode]}
+          </span>
+        </button>
       </span>
       <button
         type="button"
