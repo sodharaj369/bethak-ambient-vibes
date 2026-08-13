@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_MOOD, SCENES, posterUrl, sceneById, videoUrl, type MoodId } from "@/data/scenes";
+import { RoomLight } from "@/components/RoomLight";
+import type { LightMode } from "@/lib/roomLight";
 
 type Phase = "evening" | "night" | "late" | "deep";
 
@@ -219,10 +221,13 @@ function SceneLayer({
 export function BethakBackground({
   mood = DEFAULT_MOOD,
   started = true,
+  lightMode = "auto",
 }: {
   mood?: MoodId;
   /** The ambient video only runs once the visitor has entered the room. */
   started?: boolean;
+  /** Atmospheric lighting of the room (visual only). */
+  lightMode?: LightMode;
 }) {
 
   // Start on the approved look, then settle into the real hour after mount
@@ -292,6 +297,9 @@ export function BethakBackground({
             />
           ))}
         </div>
+        {/* Atmospheric light lives inside the room frame, so it pans with
+            the room and never sticks to the phone screen. */}
+        {started && <RoomLight mood={shown} mode={lightMode} />}
       </div>
       <div className="absolute inset-0 bg-[oklch(0.15_0.03_60_/_0.08)]" />
       <div className="hour-wash" data-phase={phase} />
