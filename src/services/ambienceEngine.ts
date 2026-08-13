@@ -113,6 +113,9 @@ export class AmbienceEngine {
   }
 
   private fadeTo(mood: MoodId, to: number, ms: number) {
+    // Fading something silent to silence must not create (and download) a
+    // layer: before the visitor enters, no room sound is fetched at all.
+    if (to <= 0 && !this.layers.has(mood)) return;
     const layer = this.layerFor(mood);
     if (!layer) return;
     if (layer.fade) clearInterval(layer.fade);

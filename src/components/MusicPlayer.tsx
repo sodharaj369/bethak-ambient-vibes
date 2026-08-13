@@ -177,6 +177,10 @@ export function MusicPlayer({
 
   // Remember where we are, without ever interrupting playback.
   useEffect(() => {
+    // Only a sitting that actually happened is worth remembering: on the
+    // landing screen nothing is written, so a previous evening is never
+    // overwritten by a visitor who has not stepped in yet.
+    if (!autoStart) return;
     const save = () => {
       const s = engine.getState();
       writeSession({ trackId: s.track.id, index: s.index, position: s.position });
@@ -187,7 +191,7 @@ export function MusicPlayer({
       window.clearInterval(id);
       window.removeEventListener("pagehide", save);
     };
-  }, [engine]);
+  }, [engine, autoStart]);
 
   // Entering the room is a real user gesture: start the music from it.
   useEffect(() => {
@@ -303,8 +307,9 @@ export function MusicPlayer({
                 aria-disabled={!state.canPlay}
                 onClick={() => {
                   if (state.isPlaying) {
+                    // Only the ghazal stops. The room itself keeps breathing —
+                    // the ambience has its own switch.
                     engine.pause();
-                    ambience.suspend();
                     return;
                   }
                   // Explicit gesture: the room may breathe again.

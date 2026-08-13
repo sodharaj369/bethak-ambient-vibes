@@ -180,10 +180,13 @@
   top: 50%;
   left: 50%;
   /* --pan-x is 0 everywhere in production; only the mobile pan prototype
-     (/pan-lab) sets it, so video and hotspot layers move together. */
+     (/pan-lab) sets it, so video and hotspot layers move together.
+     Vertically the frame is exactly as tall as the viewport in portrait, so
+     there is no slack to shift into: the focal y is clamped to the centre and
+     a frame edge (a black band) can never enter the screen. */
   transform: translate(
     calc(-1 * var(--m-x, 62%) + var(--pan-x, 0px)),
-    calc(-1 * var(--m-y, 48%))
+    calc(-1 * max(var(--m-y, 48%), 50%))
   );
   width: max(100vw, calc(100dvh * 1.791));
   height: max(100dvh, calc(100vw / 1.791));

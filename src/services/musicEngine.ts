@@ -156,10 +156,13 @@ export class YouTubeEngine implements MusicEngine {
         },
       }) as YTPlayer;
     });
-    // Reads live player time — no simulated progress.
+    // Reads live player time — no simulated progress. A silent room does not
+    // need four re-renders a second: the ticker only runs while something is
+    // actually moving; every other change still emits on its own event.
     this.ticker = setInterval(() => {
       if (!this.ready) return;
       this.applyPendingSeek();
+      if (!this.playing && this.pendingSeek == null) return;
       this.emit();
     }, 250);
   }

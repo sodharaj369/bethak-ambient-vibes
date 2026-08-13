@@ -106,7 +106,7 @@ export function HarmoniumSpot({ mood, enabled }: { mood: MoodId; enabled: boolea
   } as React.CSSProperties;
 
   return (
-    <div className="chai-layer" aria-hidden={!enabled}>
+    <div className="chai-layer" inert={!enabled}>
       <div className="room-frame" style={frameVars}>
         <div className="chai-spot" style={spotVars}>
           <button

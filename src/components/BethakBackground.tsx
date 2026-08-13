@@ -84,12 +84,16 @@ function SceneLayer({
       return;
     }
 
-    try {
-      a.currentTime = 0;
-    } catch {
-      /* not seekable yet */
+    // Only rewind a layer that is not already running: the twin mounting
+    // re-runs this effect a beat after entry and must never restart the room.
+    if (a.paused) {
+      try {
+        a.currentTime = 0;
+      } catch {
+        /* not seekable yet */
+      }
+      setFront(0);
     }
-    setFront(0);
     play(a);
     const twinTimer = window.setTimeout(() => setTwin(true), 1200);
     if (!b) {
