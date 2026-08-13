@@ -23,7 +23,7 @@ export const AUTO_LEVEL: Record<MoodId, number> = {
 };
 
 export function nextLightMode(mode: LightMode): LightMode {
-  return LIGHT_MODES[(LIGHT_MODES.indexOf(mode) + 1) % LIGHT_MODES.length];
+  return LIGHT_MODES[(LIGHT_MODES.indexOf(mode) + 1) % LIGHT_MODES.length] ?? "auto";
 }
 
 export function readLightMode(): LightMode {
