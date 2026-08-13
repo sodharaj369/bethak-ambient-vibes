@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { getYouTubeEngine, type PlayerState } from "@/services/musicEngine";
 import { bethakPlaylist, type MusicTrack } from "@/data/playlist";
 import type { MoodId } from "@/data/scenes";
@@ -104,7 +104,13 @@ export function MusicPlayer({
 }) {
   const engine = useMemo(() => getYouTubeEngine(YT_HOST_ID, tracks.length ? tracks : bethakPlaylist), []);
   const ambience = useMemo(() => getAmbienceEngine(), []);
-  const [state, setState] = useState<PlayerState>(() => engine.getState());
+  // The engine is the store: React reads its cached snapshot instead of being
+  // pushed a fresh object on every 250ms tick, so identical state re-renders
+  // nothing and no effect can be re-triggered by the ticker.
+  const subscribe = useCallback((cb: () => void) => engine.subscribe(cb), [engine]);
+  const getSnapshot = useCallback(() => engine.getState(), [engine]);
+  const state = useSyncExternalStore<PlayerState>(subscribe, getSnapshot, getSnapshot);
+
   const [open, setOpen] = useState(false);
   const barRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef(false);
@@ -211,12 +217,9 @@ export function MusicPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStart, engine, ambience]);
 
-  useEffect(() => {
-    const unsub = engine.subscribe(setState);
-    // Only unsubscribe here: the engine owns the YouTube player for the page
-    // lifetime, so a dev-mode remount must not tear the real player down.
-    return unsub;
-  }, [engine]);
+  // Subscription lives in useSyncExternalStore above; the engine keeps owning
+  // the YouTube player for the page lifetime.
+
 
   const pct = state.duration ? Math.min(100, (state.position / state.duration) * 100) : 0;
 
