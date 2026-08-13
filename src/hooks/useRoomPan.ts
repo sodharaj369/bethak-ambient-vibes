@@ -65,6 +65,10 @@ export function useRoomPan(depKey?: unknown): RoomPan {
   }, []);
 
   const measure = useCallback(() => {
+    // While a finger is down the frame is moving every pointer event; measuring
+    // then would feed the pan back into its own limits. Geometry is re-read on
+    // release, resize and orientation change instead.
+    if (drag.current?.active) return;
     const viewW = window.innerWidth;
     setPortrait(viewW < 768 && window.innerHeight >= viewW);
     const frame = stageRef.current?.querySelector<HTMLElement>(".room-frame");
